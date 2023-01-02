@@ -17,5 +17,5 @@ following manifestations:
 
 ## Installation 
 
-You can install the package using the devtools::install_github("nkorf/grangersearch")
+You can install the package using the `devtools::install_github("nkorf/grangersearch")`
 
