@@ -1,3 +1,10 @@
+#' Perform a Granger causality test on two time series
+#'
+#' @param X a numeric vector or time series
+#' @param Y a numeric vector or time series
+#' @return a character string indicating the results of the test
+#' @export
+
 granger_causality_test <- function(X, Y) {
   # First, we will fit four VAR models:
   # model_X: only X as predictor
