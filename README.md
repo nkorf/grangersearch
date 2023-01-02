@@ -1,9 +1,7 @@
 # grangeRsearch - R package
 
-_Dr Nikolaos Korfiatis
-Associate Professor in Business Analytics, University of East Anglia 
-Norwich Business School 
-_
+_Dr Nikolaos Korfiatis, Associate Professor in Business Analytics, University of East Anglia 
+_Norwich Business School_
 
 > This is a work in progress. Use at your own risk.
 
