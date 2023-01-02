@@ -15,3 +15,7 @@ following manifestations:
  * XY: both X and Y as predictors
  * YX: both Y and X as predictors
 
+## Installation 
+
+You can install the package using the devtools::install_github("nkorf/grangersearch")
+
