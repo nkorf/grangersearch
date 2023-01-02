@@ -1,0 +1,8 @@
+Package: grangersearch
+Title: grangeRsearch 
+Version: 0.1.0
+Authors@R: person("Nikolaos", "Korfiatis", email = "n.korfiatis@uea.ac.uk", role = c("aut", "cre"))
+Description: My package performs a Granger causality test on two time series X and Y.
+License: MIT + file LICENSE
+Encoding: UTF-8
+LazyData: true
