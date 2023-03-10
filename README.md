@@ -19,3 +19,6 @@ following manifestations:
 
 You can install the package using the `devtools::install_github("nkorf/grangersearch")`
 
+## Updates 
+
+* No updates yet
