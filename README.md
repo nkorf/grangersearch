@@ -7,7 +7,7 @@ _Norwich Business School_
 > This is a work in progress. Use at your own risk.
 
 An R package for performing exhaustive search for granger causality for transactions time series. 
-Given a `X` and `Y` timeseries as input, it performs a granger test to assertain causality. It considers the 
+Given a $X$ and $Y$ timeseries as input, it performs a granger test to assertain causality. It considers the 
 following manifestations: 
 
  * X: only X as predictor
