@@ -1,0 +1,194 @@
+---
+title: "Introduction to grangersearch"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Introduction to grangersearch}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+## Overview
+
+The `grangersearch` package provides tools for performing Granger causality tests on pairs of time series. Granger causality is a statistical concept that tests whether one time series helps predict another.
+
+```{r setup}
+library(grangersearch)
+```
+
+## What is Granger Causality?
+
+A variable X is said to **Granger-cause** Y if past values of X contain information that helps predict Y, above and beyond the information contained in past values of Y alone. This is not true causality in the philosophical sense, but rather predictive causality based on temporal precedence.
+
+The test works by fitting Vector Autoregressive (VAR) models and comparing restricted vs unrestricted models using F-tests.
+
+## Basic Usage
+
+### Vector Input
+
+The simplest way to use the package is with two numeric vectors:
+
+```{r basic-usage}
+# Generate example time series
+set.seed(123)
+n <- 100
+
+# X is a random walk
+x <- cumsum(rnorm(n))
+
+# Y depends on lagged X (so X should Granger-cause Y)
+y <- c(0, x[1:(n-1)]) + rnorm(n, sd = 0.5)
+
+# Perform the test
+result <- granger_causality_test(x = x, y = y)
+print(result)
+```
+
+### Detailed Summary
+
+Use `summary()` for a more detailed output:
+
+```{r summary}
+summary(result)
+```
+
+## Tidyverse Integration
+
+The package supports tidyverse-style syntax, making it easy to use with data frames and pipes.
+
+### Using with Data Frames
+
+```{r tidyverse-df}
+library(tibble)
+
+# Create a tibble with time series
+df <- tibble(
+  price = cumsum(rnorm(100)),
+  volume = c(0, cumsum(rnorm(99)))
+)
+
+# Use column names directly
+result <- granger_causality_test(df, price, volume)
+print(result)
+```
+
+### Using Pipes
+
+```{r pipes}
+# With base R pipe
+df |>
+  granger_causality_test(price, volume)
+```
+
+### Tidy Output
+
+For programmatic access to results, use `tidy()`:
+```{r tidy}
+result <- granger_causality_test(x = x, y = y)
+tidy(result)
+```
+
+Use `glance()` for model-level summary:
+
+```{r glance}
+glance(result)
+```
+
+## Adjusting Parameters
+
+### Lag Order
+
+The lag parameter controls the number of lagged values used in the VAR model:
+
+```{r lag}
+# Using lag = 2
+result_lag2 <- granger_causality_test(x = x, y = y, lag = 2)
+print(result_lag2)
+```
+
+### Significance Level
+
+Adjust the significance level with the `alpha` parameter:
+
+```{r alpha}
+# More conservative test with alpha = 0.01
+result_strict <- granger_causality_test(x = x, y = y, alpha = 0.01)
+print(result_strict)
+```
+
+## Interpreting Results
+
+The function tests causality in **both directions**:
+
+1. **X → Y**: Does X help predict Y?
+2. **Y → X**: Does Y help predict X?
+
+Possible outcomes:
+
+- **Unidirectional causality**: Only one direction is significant
+- **Bidirectional causality**: Both directions are significant
+- **No causality**: Neither direction is significant
+
+### Accessing Individual Results
+
+```{r components}
+result <- granger_causality_test(x = x, y = y)
+
+# Logical indicators
+result$x_causes_y
+result$y_causes_x
+
+# P-values
+result$p_value_xy
+result$p_value_yx
+
+# Test statistics
+result$test_statistic_xy
+```
+
+## Example: Financial Data
+
+A common application is testing whether one financial variable predicts another:
+
+```{r finance-example}
+set.seed(42)
+n <- 250  # About one year of trading days
+
+# Simulate stock returns
+stock_returns <- rnorm(n, mean = 0.0005, sd = 0.02)
+
+# Trading volume often leads price movements
+# Volume is partially predictive of next-day returns
+volume <- abs(rnorm(n, mean = 1000, sd = 200))
+volume_effect <- c(0, 0.001 * scale(volume[1:(n-1)]))
+price_with_volume <- stock_returns + volume_effect
+
+df <- tibble(
+  returns = price_with_volume,
+  volume = volume
+)
+
+# Test if volume Granger-causes returns
+result <- df |> granger_causality_test(volume, returns)
+print(result)
+```
+
+## Important Notes
+
+1. **Stationarity**: Granger causality tests assume stationary time series. Consider differencing non-stationary data.
+
+2. **Lag selection**: The choice of lag order matters. Too few lags may miss dynamics; too many reduce power.
+
+3. **Sample size**: More observations give more reliable results. The minimum is `2 * lag + 2`.
+
+4. **Not true causality**: Granger causality indicates predictive relationships, not true causal mechanisms.
+
+## References
+
+Granger, C. W. J. (1969). Investigating Causal Relations by Econometric Models and Cross-spectral Methods. *Econometrica*, 37(3), 424-438.

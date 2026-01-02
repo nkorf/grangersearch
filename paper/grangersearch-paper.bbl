@@ -1,0 +1,73 @@
+\begin{thebibliography}{}
+
+\bibitem[Granger, 1969]{granger1969investigating}
+Granger, C.~W. (1969).
+\newblock Investigating causal relations by econometric models and cross-spectral methods.
+\newblock {\em Econometrica}, 37(3):424--438.
+
+\bibitem[Henry and Wickham, 2024]{rlang}
+Henry, L. and Wickham, H. (2024).
+\newblock {\em rlang: Functions for Base Types and Core {R} and 'Tidyverse' Features}.
+\newblock R package version 1.1.4.
+
+\bibitem[Hiemstra and Jones, 1994]{hiemstra1994testing}
+Hiemstra, C. and Jones, J.~D. (1994).
+\newblock Testing for linear and nonlinear {G}ranger causality in the stock price-volume relation.
+\newblock {\em The Journal of Finance}, 49(5):1639--1664.
+
+\bibitem[Kraft and Kraft, 1978]{kraft1978relationship}
+Kraft, J. and Kraft, A. (1978).
+\newblock On the relationship between energy and {GNP}.
+\newblock {\em The Journal of Energy and Development}, 3(2):401--403.
+
+\bibitem[L{\"u}tkepohl, 2005]{lutkepohl2005new}
+L{\"u}tkepohl, H. (2005).
+\newblock {\em New introduction to multiple time series analysis}.
+\newblock Springer.
+
+\bibitem[Peters et~al., 2017]{peters2017elements}
+Peters, J., Janzing, D., and Sch{\"o}lkopf, B. (2017).
+\newblock {\em Elements of causal inference: Foundations and learning algorithms}.
+\newblock MIT Press.
+
+\bibitem[Pfaff, 2008]{vars}
+Pfaff, B. (2008).
+\newblock {\em vars: VAR Modelling}.
+\newblock R package version 1.6-1.
+
+\bibitem[Robinson, 2014]{robinson2014broom}
+Robinson, D. (2014).
+\newblock broom: An {R} package for converting statistical analysis objects into tidy data frames.
+\newblock {\em arXiv preprint arXiv:1412.3565}.
+
+\bibitem[Seth et~al., 2015]{seth2015granger}
+Seth, A.~K., Barrett, A.~B., and Barnett, L. (2015).
+\newblock {G}ranger causality analysis in neuroscience and neuroimaging.
+\newblock {\em Journal of Neuroscience}, 35(8):3293--3297.
+
+\bibitem[Sims, 1972]{sims1972money}
+Sims, C.~A. (1972).
+\newblock Money, income, and causality.
+\newblock {\em The American Economic Review}, 62(4):540--552.
+
+\bibitem[Sims, 1980]{sims1980macroeconomics}
+Sims, C.~A. (1980).
+\newblock Macroeconomics and reality.
+\newblock {\em Econometrica}, 48(1):1--48.
+
+\bibitem[Toda and Yamamoto, 1995]{toda1995statistical}
+Toda, H.~Y. and Yamamoto, T. (1995).
+\newblock Statistical inference in vector autoregressions with possibly integrated processes.
+\newblock {\em Journal of Econometrics}, 66(1-2):225--250.
+
+\bibitem[Wickham et~al., 2019]{wickham2019welcome}
+Wickham, H., Averick, M., Bryan, J., Chang, W., McGowan, L.~D., Fran{\c{c}}ois, R., Grolemund, G., Hayes, A., Henry, L., Hester, J., et~al. (2019).
+\newblock Welcome to the tidyverse.
+\newblock {\em Journal of Open Source Software}, 4(43):1686.
+
+\bibitem[Zeileis and Hothorn, 2002]{lmtest}
+Zeileis, A. and Hothorn, T. (2002).
+\newblock {\em lmtest: Testing Linear Regression Models}.
+\newblock R package version 0.9-40.
+
+\end{thebibliography}

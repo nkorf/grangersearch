@@ -1,0 +1,511 @@
+\documentclass[11pt,a4paper]{article}
+
+% Packages
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{hyperref}
+\usepackage{natbib}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage[margin=1in]{geometry}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+
+% Code listing style
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+
+\lstdefinestyle{Rstyle}{
+    backgroundcolor=\color{backcolour},
+    commentstyle=\color{codegreen},
+    keywordstyle=\color{magenta},
+    numberstyle=\tiny\color{codegray},
+    stringstyle=\color{codepurple},
+    basicstyle=\ttfamily\small,
+    breakatwhitespace=false,
+    breaklines=true,
+    captionpos=b,
+    keepspaces=true,
+    numbers=left,
+    numbersep=5pt,
+    showspaces=false,
+    showstringspaces=false,
+    showtabs=false,
+    tabsize=2,
+    frame=single
+}
+\lstset{style=Rstyle}
+
+% Title information
+\title{\textbf{grangersearch}: An R Package for Granger Causality Testing with Tidyverse Integration}
+
+\author{
+    Nikolaos Korfiatis\\
+    \textit{Department of Informatics}\\
+    \textit{School of Information Science and Informatics}\\
+    \textit{Ionian University}\\
+    Plateia Iatrou Tsirigoti 7, GR-49100\\
+    Corfu, Greece\\
+    \texttt{nkorf@ionio.gr}
+}
+
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+This paper introduces \texttt{grangersearch}, an R package for performing exhaustive Granger causality searches on multiple time series. The package provides a user-friendly interface for discovering predictive causal relationships between variables using Vector Autoregressive (VAR) models. Key features include: (1) exhaustive pairwise search across multiple variables, (2) automatic lag order optimization with visualization, (3) tidyverse-compatible syntax with pipe operators and non-standard evaluation, (4) built-in visualization for lag selection analysis, and (5) integration with the \texttt{broom} ecosystem through \texttt{tidy()} and \texttt{glance()} methods. The package is designed for researchers and practitioners in economics, finance, and other fields who need to discover temporal causal relationships among multiple time series. This paper describes the statistical methodology, demonstrates the package functionality through examples, and discusses practical considerations for applying Granger causality tests.
+\end{abstract}
+
+\noindent\textbf{Keywords:} Granger causality, time series analysis, VAR models, R package, tidyverse
+
+\section{Introduction}
+
+Understanding causal relationships between time series variables is a fundamental problem in economics, finance, neuroscience, and many other fields. While true causality is philosophically complex and difficult to establish from observational data alone, \citet{granger1969investigating} proposed a practical, testable notion of causality based on predictability: a variable $X$ is said to ``Granger-cause'' another variable $Y$ if past values of $X$ contain information that helps predict $Y$ beyond what is contained in past values of $Y$ alone.
+
+Granger causality has become one of the most widely used methods for analyzing lead-lag relationships in time series data. Applications span diverse domains including macroeconomics \citep{sims1972money}, financial markets \citep{hiemstra1994testing}, energy economics \citep{kraft1978relationship}, and neuroscience \citep{seth2015granger}.
+
+Despite its popularity, implementing Granger causality tests in R requires users to navigate multiple packages and manually construct the testing procedure. The \texttt{vars} package \citep{vars} provides the underlying VAR modeling infrastructure, but users must understand the model specification, extract appropriate test statistics, and interpret results. This complexity can be a barrier for applied researchers who need a straightforward tool for exploratory causal analysis.
+
+This paper presents \texttt{grangersearch}, an R package that provides a simple, intuitive interface for Granger causality testing. The package wraps the \texttt{vars} infrastructure while providing:
+
+\begin{itemize}
+    \item A single function interface that tests causality in both directions
+    \item Exhaustive pairwise search across multiple time series variables
+    \item Automatic lag order optimization with visualization
+    \item Tidyverse-compatible syntax with pipe operators and non-standard evaluation
+    \item Structured output objects with all relevant test statistics
+    \item Integration with the \texttt{broom} package ecosystem
+    \item Comprehensive input validation and informative error messages
+\end{itemize}
+
+The remainder of this paper is organized as follows. Section~\ref{sec:methodology} reviews the statistical methodology underlying Granger causality tests. Section~\ref{sec:package} describes the package design and functionality. Section~\ref{sec:examples} provides worked examples. Section~\ref{sec:discussion} discusses practical considerations and limitations. Section~\ref{sec:conclusion} concludes.
+
+\section{Statistical Methodology}
+\label{sec:methodology}
+
+\subsection{Granger Causality}
+
+The concept of Granger causality is based on two principles: (1) the cause occurs before the effect, and (2) the cause contains unique information about the effect that is not available elsewhere \citep{granger1969investigating}.
+
+Formally, let $\{X_t\}$ and $\{Y_t\}$ be two stationary time series. $X$ is said to Granger-cause $Y$ if:
+
+\begin{equation}
+    \sigma^2(Y_t | Y_{t-1}, Y_{t-2}, \ldots) > \sigma^2(Y_t | Y_{t-1}, Y_{t-2}, \ldots, X_{t-1}, X_{t-2}, \ldots)
+\end{equation}
+
+\noindent where $\sigma^2(Y_t | \cdot)$ denotes the variance of the optimal linear predictor of $Y_t$ given the conditioning information. In other words, $X$ Granger-causes $Y$ if including past values of $X$ improves the prediction of $Y$ beyond what is achieved using past values of $Y$ alone.
+
+\subsection{Vector Autoregressive Models}
+
+The standard approach to testing Granger causality uses Vector Autoregressive (VAR) models \citep{sims1980macroeconomics}. A VAR model of order $p$ for two variables can be written as:
+
+\begin{align}
+    Y_t &= \alpha_1 + \sum_{i=1}^{p} \beta_{1i} Y_{t-i} + \sum_{i=1}^{p} \gamma_{1i} X_{t-i} + \varepsilon_{1t} \label{eq:var1} \\
+    X_t &= \alpha_2 + \sum_{i=1}^{p} \beta_{2i} X_{t-i} + \sum_{i=1}^{p} \gamma_{2i} Y_{t-i} + \varepsilon_{2t} \label{eq:var2}
+\end{align}
+
+\noindent where $\varepsilon_{1t}$ and $\varepsilon_{2t}$ are white noise error terms that may be contemporaneously correlated.
+
+\subsection{Testing Procedure}
+
+Testing whether $X$ Granger-causes $Y$ is equivalent to testing whether the coefficients $\gamma_{1i}$ in Equation~\eqref{eq:var1} are jointly equal to zero:
+
+\begin{equation}
+    H_0: \gamma_{11} = \gamma_{12} = \cdots = \gamma_{1p} = 0
+\end{equation}
+
+This hypothesis can be tested using an $F$-test (or equivalently, a Wald test). Under the null hypothesis of no Granger causality, the test statistic follows an $F(p, T-2p-1)$ distribution, where $T$ is the sample size and $p$ is the lag order.
+
+The \texttt{grangersearch} package performs this test in both directions, providing a complete picture of the predictive relationships between the two series.
+
+\subsection{Interpretation and Limitations}
+
+The interpretation of Granger causality results requires careful consideration of several important caveats. Most fundamentally, Granger causality is a statistical concept based on predictability rather than a philosophical statement about causal mechanisms. A finding that $X$ Granger-causes $Y$ indicates that lagged values of $X$ provide statistically significant predictive information about $Y$ beyond what is contained in the history of $Y$ itself. However, such a relationship may arise from confounding variables, reverse causality operating at different time scales, or other non-causal processes \citep{peters2017elements}. Researchers should therefore interpret Granger-causal relationships as evidence of predictive precedence rather than definitive proof of causal influence.
+
+The standard Granger causality test relies on the assumption that the time series under analysis are stationary. When this assumption is violated, test statistics may not follow their assumed distributions, leading to spurious inference. Non-stationary series should be transformed through differencing or, when appropriate, analyzed within a cointegration framework that accounts for long-run equilibrium relationships \citep{toda1995statistical}.
+
+Results from Granger causality tests can exhibit sensitivity to the choice of lag order $p$ in the VAR specification. Selecting too few lags may fail to capture the true dynamic relationship, while selecting too many lags reduces statistical power and may introduce spurious correlations. Information criteria such as AIC and BIC provide data-driven guidance for lag selection, though examining results across multiple reasonable lag specifications is advisable to assess robustness \citep{lutkepohl2005new}.
+
+Finally, standard Granger causality tests are inherently bivariate in nature. When multiple variables are potentially relevant, pairwise tests may fail to detect relationships that only manifest when conditioning on additional variables, or may identify spurious relationships that disappear in a fuller multivariate specification. Researchers analyzing complex systems should consider whether bivariate analysis adequately captures the relevant dynamics or whether multivariate approaches are warranted.
+
+\section{Package Description}
+\label{sec:package}
+
+\subsection{Installation}
+
+The \texttt{grangersearch} package can be installed from GitHub:
+
+\begin{lstlisting}[language=R]
+# Install from GitHub
+devtools::install_github("nkorf/grangersearch")
+\end{lstlisting}
+
+\subsection{Main Function}
+
+The primary function is \texttt{granger\_causality\_test()}, which accepts two time series and returns a structured result object:
+
+\begin{lstlisting}[language=R]
+granger_causality_test(.data = NULL, x, y,
+                       lag = 1, alpha = 0.05, test = "F")
+\end{lstlisting}
+
+\noindent\textbf{Arguments:}
+\begin{itemize}
+    \item \texttt{.data}: Optional data frame or tibble containing the time series
+    \item \texttt{x}, \texttt{y}: Numeric vectors or column names (if \texttt{.data} provided)
+    \item \texttt{lag}: Integer lag order for the VAR model (default: 1)
+    \item \texttt{alpha}: Significance level for hypothesis testing (default: 0.05)
+    \item \texttt{test}: Test type, currently only \texttt{"F"} supported
+\end{itemize}
+
+\subsection{Tidyverse Integration}
+
+A key design goal of \texttt{grangersearch} is seamless integration with the tidyverse ecosystem \citep{wickham2019welcome}. The package supports:
+
+\textbf{Pipe operators:} Both the magrittr pipe (\texttt{\%>\%}) and the native R pipe (\texttt{|>}) are supported:
+
+\begin{lstlisting}[language=R]
+# Using native pipe
+df |> granger_causality_test(price, volume)
+
+# Using magrittr pipe
+df %>% granger_causality_test(price, volume)
+\end{lstlisting}
+
+\textbf{Non-standard evaluation:} Column names can be passed unquoted when using a data frame:
+
+\begin{lstlisting}[language=R]
+# Unquoted column names
+granger_causality_test(df, price, volume)
+
+# Equivalent to
+granger_causality_test(x = df$price, y = df$volume)
+\end{lstlisting}
+
+\textbf{Broom compatibility:} The package provides \texttt{tidy()} and \texttt{glance()} methods following the conventions of the \texttt{broom} package \citep{robinson2014broom}:
+
+\begin{lstlisting}[language=R]
+result <- granger_causality_test(x = x, y = y)
+
+# Tidy output (one row per direction)
+tidy(result)
+
+# Model summary (one row)
+glance(result)
+\end{lstlisting}
+
+\subsection{Output Structure}
+
+The function returns an S3 object of class \texttt{granger\_result} containing:
+
+\begin{table}[h]
+\centering
+\begin{tabular}{ll}
+\toprule
+\textbf{Component} & \textbf{Description} \\
+\midrule
+\texttt{x\_causes\_y} & Logical: does $X$ Granger-cause $Y$? \\
+\texttt{y\_causes\_x} & Logical: does $Y$ Granger-cause $X$? \\
+\texttt{p\_value\_xy} & $p$-value for $X \rightarrow Y$ test \\
+\texttt{p\_value\_yx} & $p$-value for $Y \rightarrow X$ test \\
+\texttt{test\_statistic\_xy} & $F$-statistic for $X \rightarrow Y$ test \\
+\texttt{test\_statistic\_yx} & $F$-statistic for $Y \rightarrow X$ test \\
+\texttt{lag} & Lag order used \\
+\texttt{alpha} & Significance level used \\
+\texttt{n} & Number of observations \\
+\bottomrule
+\end{tabular}
+\caption{Components of the \texttt{granger\_result} object}
+\label{tab:components}
+\end{table}
+
+\subsection{S3 Methods}
+
+The package provides intuitive \texttt{print()} and \texttt{summary()} methods:
+
+\begin{lstlisting}[language=R]
+result <- granger_causality_test(x = x, y = y)
+print(result)
+\end{lstlisting}
+
+\begin{verbatim}
+Granger Causality Test
+======================
+
+Observations: 100, Lag order: 1, Significance level: 0.050
+
+x -> y: x Granger-causes y (p = 0.0001)
+y -> x: y does not Granger-cause x (p = 0.4521)
+\end{verbatim}
+
+\subsection{Exhaustive Pairwise Search}
+
+A key feature of \texttt{grangersearch} is the ability to perform exhaustive pairwise Granger causality tests across multiple time series. The \texttt{granger\_search()} function tests all directed pairs of variables in a dataset:
+
+\begin{lstlisting}[language=R]
+granger_search(.data, ..., lag = 1, alpha = 0.05, test = "F",
+               include_insignificant = FALSE)
+\end{lstlisting}
+
+\noindent\textbf{Arguments:}
+\begin{itemize}
+    \item \texttt{.data}: Data frame or tibble containing the time series
+    \item \texttt{...}: Optional column selection (if omitted, all numeric columns are used)
+    \item \texttt{lag}: Integer lag order or vector of lags to test
+    \item \texttt{alpha}: Significance level for filtering results
+    \item \texttt{include\_insignificant}: Logical; if \texttt{FALSE}, only significant relationships are returned
+\end{itemize}
+
+For $n$ variables, the function tests all $n(n-1)$ directed pairs and returns results sorted by $p$-value. This enables rapid discovery of predictive relationships in multivariate datasets. When a vector of lags is provided, the function tests each lag order and returns the best result (lowest $p$-value) for each pair.
+
+The results can be visualized as a causality matrix using the \texttt{plot()} method, which produces a two-panel heatmap display similar to correlation matrices. Figure~\ref{fig:causalmatrix} shows an example output. The left panel (Row $\rightarrow$ Column) tests whether each row variable Granger-causes each column variable, while the right panel (Column $\rightarrow$ Row) shows the reverse direction. Cells are colored blue for significant relationships (at the specified $\alpha$ level) and gray for non-significant relationships, with actual $p$-values displayed in each cell.
+
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=0.95\textwidth]{causality_matrix_plot.pdf}
+    \caption{Causality matrix visualization from \texttt{plot(granger\_search())} applied to the \texttt{Canada} dataset from the \textbf{vars} package \citep{vars}. This dataset contains quarterly Canadian macroeconomic data (1980--2000) with four variables: Employment, Productivity, Real Wages, and Unemployment. The left panel (Row $\rightarrow$ Column) tests whether each row variable Granger-causes each column variable; the right panel shows the reverse. Cells are colored blue for statistically significant relationships ($p < 0.05$) and gray otherwise, with $p$-values displayed. Notable findings include Employment strongly Granger-causing Unemployment ($p < 0.001$), consistent with labor market dynamics.}
+    \label{fig:causalmatrix}
+\end{figure}
+
+\subsection{Lag Order Selection}
+
+Choosing the appropriate lag order is critical for Granger causality testing. The \texttt{granger\_lag\_select()} function systematically evaluates multiple lag orders to help identify the optimal specification:
+
+\begin{lstlisting}[language=R]
+granger_lag_select(.data, ..., lag = 1:4, alpha = 0.05, test = "F")
+\end{lstlisting}
+
+The function returns an S3 object of class \texttt{granger\_lag\_select} containing detailed results for each lag order tested. A \texttt{plot()} method provides visualization of how $p$-values and test statistics vary across lag orders:
+
+\begin{lstlisting}[language=R]
+# Analyze lag selection
+lag_analysis <- df |> granger_lag_select(x, y, lag = 1:8)
+
+# Visualize results
+plot(lag_analysis)
+\end{lstlisting}
+
+The visualization displays $p$-values across lag orders for each direction of causality, with a horizontal reference line at the significance level. This helps researchers assess the sensitivity of results to lag specification and identify robust causal relationships. Figure~\ref{fig:lagselect} shows an example output from \texttt{plot(granger\_lag\_select())}, illustrating how $p$-values for both causal directions vary across lag orders 1 through 8.
+
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=0.9\textwidth]{lag_selection_plot.pdf}
+    \caption{Lag selection analysis for Employment and Unemployment from the \texttt{Canada} dataset. The plot displays $p$-values for both directions of Granger causality across lag orders 1 to 8. The horizontal dashed line indicates the significance threshold ($\alpha = 0.05$). Employment consistently Granger-causes Unemployment across all lag specifications (solid line below threshold), while the reverse relationship remains insignificant at most lags, demonstrating a robust unidirectional causal relationship consistent with labor market theory.}
+    \label{fig:lagselect}
+\end{figure}
+
+\section{Examples}
+\label{sec:examples}
+
+\subsection{Basic Usage}
+
+The following example demonstrates the package using simulated data where $X$ Granger-causes $Y$:
+
+\begin{lstlisting}[language=R]
+library(grangersearch)
+
+# Generate data with known causal structure
+set.seed(123)
+n <- 200
+x <- cumsum(rnorm(n))  # Random walk
+y <- c(0, 0.7 * x[1:(n-1)]) + rnorm(n, sd = 0.5)  # Y depends on lagged X
+
+# Perform test
+result <- granger_causality_test(x = x, y = y)
+print(result)
+\end{lstlisting}
+
+\begin{verbatim}
+Granger Causality Test
+======================
+
+Observations: 200, Lag order: 1, Significance level: 0.050
+
+x -> y: x Granger-causes y (p = 0.0000)
+y -> x: y does not Granger-cause x (p = 0.8934)
+\end{verbatim}
+
+As expected, the test correctly identifies that $X$ Granger-causes $Y$ but not vice versa.
+
+\subsection{Using with Data Frames}
+
+The tidyverse-style interface enables clean, readable code:
+
+\begin{lstlisting}[language=R]
+library(tibble)
+
+# Create data frame
+df <- tibble(
+  price = cumsum(rnorm(200)),
+  volume = c(0, 0.5 * price[1:199]) + rnorm(200)
+)
+
+# Test using pipe and column names
+result <- df |>
+  granger_causality_test(price, volume)
+
+# Get tidy results
+tidy(result)
+\end{lstlisting}
+
+\begin{verbatim}
+# A tibble: 2 x 6
+  direction      cause  effect statistic p.value significant
+  <chr>          <chr>  <chr>      <dbl>   <dbl> <lgl>
+1 price -> volume price  volume     45.2 1.23e-9 TRUE
+2 volume -> price volume price       0.4 5.34e-1 FALSE
+\end{verbatim}
+
+\subsection{Comparing Different Lag Orders}
+
+The lag order can affect results. Researchers should explore multiple specifications:
+
+\begin{lstlisting}[language=R]
+# Test with different lags
+results <- lapply(1:4, function(p) {
+  result <- granger_causality_test(x = x, y = y, lag = p)
+  data.frame(lag = p,
+             p_value_xy = result$p_value_xy,
+             p_value_yx = result$p_value_yx)
+})
+do.call(rbind, results)
+\end{lstlisting}
+
+\subsection{Example Dataset}
+
+The package includes an example dataset \texttt{example\_causality} with known causal structure:
+
+\begin{lstlisting}[language=R]
+data(example_causality)
+
+# Inspect data
+head(example_causality)
+
+# Run test
+example_causality |>
+  granger_causality_test(cause_x, effect_y) |>
+  summary()
+\end{lstlisting}
+
+\subsection{Exhaustive Search Example}
+
+The \texttt{granger\_search()} function enables discovery of causal relationships across multiple variables. The following example demonstrates searching for Granger-causal relationships in a dataset with four economic variables:
+
+\begin{lstlisting}[language=R]
+library(grangersearch)
+
+# Simulate economic data with known structure
+set.seed(42)
+n <- 200
+econ_data <- tibble(
+  gdp = cumsum(rnorm(n)),
+  unemployment = c(0, -0.3 * gdp[1:(n-1)]) + rnorm(n, sd = 0.5),
+  inflation = cumsum(rnorm(n)),
+  interest_rate = c(0, 0.5 * inflation[1:(n-1)]) + rnorm(n, sd = 0.3)
+)
+
+# Search all pairwise relationships
+results <- econ_data |> granger_search()
+print(results)
+\end{lstlisting}
+
+\begin{verbatim}
+Granger Causality Search Results
+================================
+4 significant relationships found (alpha = 0.05)
+
+  cause         effect        p.value  lag significant
+  gdp           unemployment  0.0001   1   TRUE
+  inflation     interest_rate 0.0002   1   TRUE
+  ...
+\end{verbatim}
+
+The search correctly identifies the two planted causal relationships: GDP Granger-causes unemployment, and inflation Granger-causes the interest rate.
+
+\subsection{Lag Selection Analysis}
+
+The \texttt{granger\_lag\_select()} function helps identify the optimal lag order and assess result robustness:
+
+\begin{lstlisting}[language=R]
+# Analyze how results change with lag order
+lag_results <- econ_data |>
+  granger_lag_select(gdp, unemployment, lag = 1:6)
+
+# View detailed results
+print(lag_results)
+
+# Visualize p-values across lag orders
+plot(lag_results)
+\end{lstlisting}
+
+The plot shows $p$-values for both directions of causality (GDP $\rightarrow$ unemployment and unemployment $\rightarrow$ GDP) across different lag orders. Consistent significance across multiple lag specifications provides stronger evidence for a robust causal relationship.
+
+\subsection{Combining Search and Lag Selection}
+
+For comprehensive exploratory analysis, the exhaustive search can be combined with multiple lag specifications:
+
+\begin{lstlisting}[language=R]
+# Search with multiple lags (returns best lag per pair)
+results <- econ_data |>
+  granger_search(lag = 1:4)
+
+# Results include optimal lag for each relationship
+print(results)
+\end{lstlisting}
+
+This approach automatically selects the lag order that yields the strongest evidence for each potential causal relationship, while still controlling for multiple testing considerations.
+
+\section{Discussion}
+\label{sec:discussion}
+
+\subsection{Practical Recommendations}
+
+The application of Granger causality testing requires careful attention to several methodological considerations. First and foremost, researchers should verify that time series are stationary before conducting tests. Unit root tests such as the Augmented Dickey-Fuller (ADF) test or the Kwiatkowski-Phillips-Schmidt-Shin (KPSS) test should be applied to each series, and non-stationary series should be differenced appropriately before analysis \citep{toda1995statistical}.
+
+The selection of lag order represents another critical decision that can substantially influence results. Information criteria such as AIC and BIC provide guidance for lag selection, and the \texttt{VARselect()} function in the \texttt{vars} package offers a convenient implementation. The \texttt{granger\_lag\_select()} function introduced in this package provides an alternative approach by allowing researchers to visualize how test results vary across different lag specifications. Results that remain significant across multiple reasonable lag orders provide stronger evidence for robust causal relationships.
+
+Beyond statistical considerations, researchers should ground their analyses in substantive theory. Statistical significance alone does not establish meaningful relationships; the identified patterns should be interpretable within the relevant theoretical framework. Furthermore, it is essential to maintain appropriate caution when interpreting results. Granger causality fundamentally measures predictive relationships rather than causal mechanisms in the philosophical sense \citep{peters2017elements}. A finding that variable $X$ Granger-causes variable $Y$ indicates that past values of $X$ improve predictions of $Y$, but does not preclude the possibility that both variables are driven by an unobserved common cause.
+
+\subsection{Comparison with Alternatives}
+
+The R ecosystem offers several packages for Granger causality analysis, each with distinct strengths. The \texttt{vars} package \citep{vars} provides comprehensive VAR modeling capabilities including a \texttt{causality()} function for testing Granger causality. This package offers extensive functionality for advanced users who require fine-grained control over model specification and diagnostics. The \texttt{lmtest} package \citep{lmtest} provides a \texttt{grangertest()} function that offers a streamlined interface for bivariate testing. Additionally, specialized packages such as \texttt{bruinger} cater to domain-specific applications in neuroimaging.
+
+The \texttt{grangersearch} package occupies a distinct niche within this ecosystem. Its primary contribution lies in the combination of exhaustive search capabilities with a tidyverse-compatible interface. While existing packages require users to specify variable pairs manually, \texttt{grangersearch} automates the discovery process across multiple variables, making it particularly suitable for exploratory analysis of multivariate datasets. The integration with tidyverse conventions through pipe operators and non-standard evaluation ensures that the package fits naturally into modern R workflows, while the structured output objects and broom compatibility facilitate reproducible research practices.
+
+\subsection{Limitations and Future Work}
+
+Despite its comprehensive functionality for pairwise Granger causality analysis, the \texttt{grangersearch} package has several limitations that merit acknowledgment. The current implementation conducts tests on a pairwise basis, which does not account for potential confounding by other variables in the dataset. True multivariate Granger causality testing, which conditions on all other variables simultaneously, would provide more robust inference but requires substantially more complex implementation.
+
+The package currently implements only the $F$-test for hypothesis testing. While this approach is standard and widely accepted, alternative test statistics such as Wald tests and likelihood ratio tests offer different properties that may be preferable in certain applications. Additionally, the package assumes that input series are stationary and does not provide built-in handling for cointegrated systems, which require specialized treatment through error correction models.
+
+When conducting exhaustive searches across many variable pairs, the multiple testing problem becomes salient. Users should consider adjusting significance levels using procedures such as Bonferroni correction or false discovery rate control to maintain appropriate error rates. Future versions of the package may incorporate built-in multiple testing corrections, automatic stationarity diagnostics with differencing recommendations, conditional multivariate testing capabilities, and additional test statistics to address these limitations.
+
+\section{Conclusion}
+\label{sec:conclusion}
+
+The \texttt{grangersearch} package provides a user-friendly interface for Granger causality testing and discovery in R. By combining statistical rigor with modern R programming practices, the package makes this important econometric technique accessible to a broader audience of researchers and practitioners.
+
+Key contributions include: (1) exhaustive pairwise search functionality enabling automated discovery of causal relationships across multiple variables, (2) lag order optimization tools with visualization to support robust model specification, (3) tidyverse integration ensuring the package fits naturally into modern data analysis workflows, and (4) structured output objects that facilitate programmatic use and reproducible research.
+
+The package is intended to be useful for researchers investigating predictive causal relationships in time series data across economics, finance, neuroscience, and other disciplines where understanding temporal dependencies between variables is of interest.
+
+\section*{Computational Details}
+
+The \texttt{grangersearch} package (version 0.1.0) is available from GitHub at \url{https://github.com/nkorf/grangersearch}. It requires R version 4.1.0 or higher and depends on the \texttt{vars}, \texttt{rlang}, \texttt{tibble}, and \texttt{generics} packages. All examples were run using R version 4.5.1.
+
+\section*{Acknowledgments}
+
+The author thanks the developers of the \texttt{vars} package \citep{vars}, which provides the underlying VAR modeling infrastructure used by \texttt{grangersearch}. The tidyverse ecosystem \citep{wickham2019welcome} and \texttt{rlang} package \citep{rlang} also contributed to the design philosophy and implementation of the package.
+
+\bibliographystyle{apalike}
+\bibliography{references}
+
+\end{document}

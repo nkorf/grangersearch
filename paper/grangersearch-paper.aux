@@ -1,0 +1,83 @@
+\relax 
+\providecommand\hyper@newdestlabel[2]{}
+\providecommand\HyField@AuxAddToFields[1]{}
+\providecommand\HyField@AuxAddToCoFields[2]{}
+\citation{granger1969investigating}
+\citation{sims1972money}
+\citation{hiemstra1994testing}
+\citation{kraft1978relationship}
+\citation{seth2015granger}
+\citation{vars}
+\@writefile{toc}{\contentsline {section}{\numberline {1}Introduction}{1}{section.1}\protected@file@percent }
+\citation{granger1969investigating}
+\citation{sims1980macroeconomics}
+\@writefile{toc}{\contentsline {section}{\numberline {2}Statistical Methodology}{2}{section.2}\protected@file@percent }
+\newlabel{sec:methodology}{{2}{2}{Statistical Methodology}{section.2}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.1}Granger Causality}{2}{subsection.2.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.2}Vector Autoregressive Models}{2}{subsection.2.2}\protected@file@percent }
+\newlabel{eq:var1}{{2}{2}{Vector Autoregressive Models}{equation.2}{}}
+\newlabel{eq:var2}{{3}{2}{Vector Autoregressive Models}{equation.3}{}}
+\citation{peters2017elements}
+\citation{toda1995statistical}
+\citation{lutkepohl2005new}
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.3}Testing Procedure}{3}{subsection.2.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.4}Interpretation and Limitations}{3}{subsection.2.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {3}Package Description}{3}{section.3}\protected@file@percent }
+\newlabel{sec:package}{{3}{3}{Package Description}{section.3}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.1}Installation}{3}{subsection.3.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.2}Main Function}{3}{subsection.3.2}\protected@file@percent }
+\citation{wickham2019welcome}
+\citation{robinson2014broom}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.3}Tidyverse Integration}{4}{subsection.3.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.4}Output Structure}{4}{subsection.3.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.5}S3 Methods}{4}{subsection.3.5}\protected@file@percent }
+\citation{vars}
+\citation{vars}
+\@writefile{lot}{\contentsline {table}{\numberline {1}{\ignorespaces Components of the \texttt  {granger\_result} object}}{5}{table.1}\protected@file@percent }
+\newlabel{tab:components}{{1}{5}{Components of the \texttt {granger\_result} object}{table.1}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.6}Exhaustive Pairwise Search}{5}{subsection.3.6}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {1}{\ignorespaces Causality matrix visualization from \texttt  {plot(granger\_search())} applied to the \texttt  {Canada} dataset from the \textbf  {vars} package \citep  {vars}. This dataset contains quarterly Canadian macroeconomic data (1980--2000) with four variables: Employment, Productivity, Real Wages, and Unemployment. The left panel (Row $\rightarrow $ Column) tests whether each row variable Granger-causes each column variable; the right panel shows the reverse. Cells are colored blue for statistically significant relationships ($p < 0.05$) and gray otherwise, with $p$-values displayed. Notable findings include Employment strongly Granger-causing Unemployment ($p < 0.001$), consistent with labor market dynamics.}}{6}{figure.1}\protected@file@percent }
+\newlabel{fig:causalmatrix}{{1}{6}{Causality matrix visualization from \texttt {plot(granger\_search())} applied to the \texttt {Canada} dataset from the \textbf {vars} package \citep {vars}. This dataset contains quarterly Canadian macroeconomic data (1980--2000) with four variables: Employment, Productivity, Real Wages, and Unemployment. The left panel (Row $\rightarrow $ Column) tests whether each row variable Granger-causes each column variable; the right panel shows the reverse. Cells are colored blue for statistically significant relationships ($p < 0.05$) and gray otherwise, with $p$-values displayed. Notable findings include Employment strongly Granger-causing Unemployment ($p < 0.001$), consistent with labor market dynamics}{figure.1}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.7}Lag Order Selection}{6}{subsection.3.7}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {4}Examples}{6}{section.4}\protected@file@percent }
+\newlabel{sec:examples}{{4}{6}{Examples}{section.4}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.1}Basic Usage}{6}{subsection.4.1}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {2}{\ignorespaces Lag selection analysis for Employment and Unemployment from the \texttt  {Canada} dataset. The plot displays $p$-values for both directions of Granger causality across lag orders 1 to 8. The horizontal dashed line indicates the significance threshold ($\alpha = 0.05$). Employment consistently Granger-causes Unemployment across all lag specifications (solid line below threshold), while the reverse relationship remains insignificant at most lags, demonstrating a robust unidirectional causal relationship consistent with labor market theory.}}{7}{figure.2}\protected@file@percent }
+\newlabel{fig:lagselect}{{2}{7}{Lag selection analysis for Employment and Unemployment from the \texttt {Canada} dataset. The plot displays $p$-values for both directions of Granger causality across lag orders 1 to 8. The horizontal dashed line indicates the significance threshold ($\alpha = 0.05$). Employment consistently Granger-causes Unemployment across all lag specifications (solid line below threshold), while the reverse relationship remains insignificant at most lags, demonstrating a robust unidirectional causal relationship consistent with labor market theory}{figure.2}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.2}Using with Data Frames}{8}{subsection.4.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.3}Comparing Different Lag Orders}{8}{subsection.4.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.4}Example Dataset}{8}{subsection.4.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.5}Exhaustive Search Example}{8}{subsection.4.5}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.6}Lag Selection Analysis}{9}{subsection.4.6}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.7}Combining Search and Lag Selection}{9}{subsection.4.7}\protected@file@percent }
+\citation{toda1995statistical}
+\citation{peters2017elements}
+\citation{vars}
+\citation{lmtest}
+\@writefile{toc}{\contentsline {section}{\numberline {5}Discussion}{10}{section.5}\protected@file@percent }
+\newlabel{sec:discussion}{{5}{10}{Discussion}{section.5}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.1}Practical Recommendations}{10}{subsection.5.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.2}Comparison with Alternatives}{10}{subsection.5.2}\protected@file@percent }
+\citation{vars}
+\citation{wickham2019welcome}
+\citation{rlang}
+\bibstyle{apalike}
+\bibdata{references}
+\bibcite{granger1969investigating}{{1}{1969}{{Granger}}{{}}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.3}Limitations and Future Work}{11}{subsection.5.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {6}Conclusion}{11}{section.6}\protected@file@percent }
+\newlabel{sec:conclusion}{{6}{11}{Conclusion}{section.6}{}}
+\bibcite{rlang}{{2}{2024}{{Henry and Wickham}}{{}}}
+\bibcite{hiemstra1994testing}{{3}{1994}{{Hiemstra and Jones}}{{}}}
+\bibcite{kraft1978relationship}{{4}{1978}{{Kraft and Kraft}}{{}}}
+\bibcite{lutkepohl2005new}{{5}{2005}{{L{\"u}tkepohl}}{{}}}
+\bibcite{peters2017elements}{{6}{2017}{{Peters et~al.}}{{}}}
+\bibcite{vars}{{7}{2008}{{Pfaff}}{{}}}
+\bibcite{robinson2014broom}{{8}{2014}{{Robinson}}{{}}}
+\bibcite{seth2015granger}{{9}{2015}{{Seth et~al.}}{{}}}
+\bibcite{sims1972money}{{10}{1972}{{Sims}}{{}}}
+\bibcite{sims1980macroeconomics}{{11}{1980}{{Sims}}{{}}}
+\bibcite{toda1995statistical}{{12}{1995}{{Toda and Yamamoto}}{{}}}
+\bibcite{wickham2019welcome}{{13}{2019}{{Wickham et~al.}}{{}}}
+\bibcite{lmtest}{{14}{2002}{{Zeileis and Hothorn}}{{}}}
+\gdef \@abspage@last{12}
