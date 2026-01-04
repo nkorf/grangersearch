@@ -1,16 +1,18 @@
 # grangersearch
 
-An R package for Granger causality testing with tidyverse compatibility.
+An R package for exhaustive Granger causality testing with tidyverse integration.
 
 ## Overview
 
-`grangersearch` provides a simple, user-friendly interface for performing Granger causality tests on time series data. Key features include:
+`grangersearch` provides a simple interface for performing Granger causality tests on time series data. The package wraps the `vars` infrastructure while providing a streamlined interface for exploratory causal analysis.
 
-- **Pairwise testing**: Test whether one time series Granger-causes another
-- **Exhaustive search**: Discover causal relationships among multiple variables
-- **Lag selection**: Analyze sensitivity of results across different lag orders
-- **Tidyverse integration**: Works seamlessly with pipes and data frames
-- **Visualization**: Built-in plotting for causality matrices and lag analysis
+Key features include:
+
+- **Exhaustive pairwise search**: Automatically discover Granger-causal relationships across multiple variables
+- **Automatic lag optimization**: Systematic evaluation of multiple lag orders with visualization
+- **Tidyverse compatibility**: Pipe operators (`|>`, `%>%`) and non-standard evaluation
+- **Broom integration**: `tidy()` and `glance()` methods for structured output
+- **Visualization**: Built-in plotting for causality matrices and lag selection analysis
 
 ## Installation
 
@@ -27,25 +29,19 @@ remotes::install_github("nkorf/grangersearch")
 library(grangersearch)
 
 # Basic pairwise test
-set.seed(123)
-x <- cumsum(rnorm(200))
-y <- c(0, 0.7 * x[1:199]) + rnorm(200, sd = 0.5)
-
-result <- granger_causality_test(x = x, y = y, lag = 2)
+data(Canada, package = "vars")
+result <- Canada |> granger_causality_test(e, U, lag = 2)
 print(result)
 
-# Tidyverse-style with data frames
-library(tibble)
-df <- tibble(x = x, y = y)
-df |> granger_causality_test(x, y)
+# Get tidy results
+tidy(result)
 
 # Exhaustive search across multiple variables
-data(Canada, package = "vars")
-results <- granger_search(as.data.frame(Canada), lag = 2)
-plot(results)  # Causality matrix visualization
+search_results <- Canada |> granger_search(lag = 2)
+plot(search_results)  # Causality matrix visualization
 
 # Lag selection analysis
-lag_analysis <- granger_lag_select(df, x, y, lag = 1:8)
+lag_analysis <- Canada |> granger_lag_select(e, U, lag = 1:8)
 plot(lag_analysis)
 ```
 
@@ -58,11 +54,23 @@ plot(lag_analysis)
 | `granger_lag_select()` | Analyze results across different lag orders |
 | `tidy()` / `glance()` | Broom-style tidying of results |
 
+## Example Output
+
+```
+Granger Causality Test
+======================
+
+Observations: 84, Lag order: 2, Significance level: 0.050
+
+e -> U: e Granger-causes U (p = 0.0000)
+U -> e: U does not Granger-cause e (p = 0.2983)
+```
+
 ## Citation
 
 If you use this package, please cite:
 
-> Korfiatis, N. (2025). grangersearch: An R Package for Granger Causality Testing. arXiv preprint.
+> Korfiatis, N. (2025). grangersearch: An R Package for Exhaustive Granger Causality Testing with Tidyverse Integration. arXiv preprint. https://arxiv.org/abs/XXXX.XXXXX
 
 ## Author
 
