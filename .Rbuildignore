@@ -7,3 +7,5 @@
 ^data-raw$
 ^\.claude$
 ^paper$
+^\.playwright-mcp$
+^cran-comments\.md$
