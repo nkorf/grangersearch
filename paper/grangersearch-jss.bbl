@@ -1,0 +1,106 @@
+\begin{thebibliography}{17}
+\newcommand{\enquote}[1]{``#1''}
+\providecommand{\natexlab}[1]{#1}
+\providecommand{\url}[1]{\texttt{#1}}
+\providecommand{\urlprefix}{URL }
+\expandafter\ifx\csname urlstyle\endcsname\relax
+  \providecommand{\doi}[1]{doi:\discretionary{}{}{}#1}\else
+  \providecommand{\doi}{doi:\discretionary{}{}{}\begingroup \urlstyle{rm}\Url}\fi
+\providecommand{\eprint}[2][]{\url{#2}}
+
+\bibitem[{Granger(1969)}]{granger1969investigating}
+Granger CW (1969).
+\newblock \enquote{Investigating causal relations by econometric models and cross-spectral methods.}
+\newblock \emph{Econometrica}, \textbf{37}(3), 424--438.
+\newblock \doi{10.2307/1912791}.
+
+\bibitem[{Henry and Wickham(2024)}]{rlang}
+Henry L, Wickham H (2024).
+\newblock \emph{rlang: Functions for Base Types and Core {R} and 'Tidyverse' Features}.
+\newblock R package version 1.1.4, \urlprefix\url{https://CRAN.R-project.org/package=rlang}.
+
+\bibitem[{Hiemstra and Jones(1994)}]{hiemstra1994testing}
+Hiemstra C, Jones JD (1994).
+\newblock \enquote{Testing for linear and nonlinear {G}ranger causality in the stock price-volume relation.}
+\newblock \emph{The Journal of Finance}, \textbf{49}(5), 1639--1664.
+\newblock \doi{10.1111/j.1540-6261.1994.tb04776.x}.
+
+\bibitem[{Hmamouche(2020)}]{NlinTS}
+Hmamouche Y (2020).
+\newblock \emph{NlinTS: Models for Non Linear Causality Detection in Time Series}.
+\newblock R package version 1.4.5, \urlprefix\url{https://CRAN.R-project.org/package=NlinTS}.
+
+\bibitem[{Kraft and Kraft(1978)}]{kraft1978relationship}
+Kraft J, Kraft A (1978).
+\newblock \enquote{On the relationship between energy and {GNP}.}
+\newblock \emph{The Journal of Energy and Development}, \textbf{3}(2), 401--403.
+
+\bibitem[{L{\"u}tkepohl(2005)}]{lutkepohl2005new}
+L{\"u}tkepohl H (2005).
+\newblock \emph{New introduction to multiple time series analysis}.
+\newblock Springer.
+\newblock \doi{10.1007/978-3-540-27752-1}.
+
+\bibitem[{Peters \emph{et~al.}(2017)Peters, Janzing, and Sch{\"o}lkopf}]{peters2017elements}
+Peters J, Janzing D, Sch{\"o}lkopf B (2017).
+\newblock \emph{Elements of causal inference: Foundations and learning algorithms}.
+\newblock MIT Press.
+\newblock ISBN 9780262037310.
+
+\bibitem[{Pfaff(2008)}]{vars}
+Pfaff B (2008).
+\newblock \emph{vars: VAR Modelling}.
+\newblock R package version 1.6-1, \urlprefix\url{https://CRAN.R-project.org/package=vars}.
+
+\bibitem[{{R Core Team}(2024)}]{R}
+{R Core Team} (2024).
+\newblock \emph{R: A Language and Environment for Statistical Computing}.
+\newblock R Foundation for Statistical Computing, Vienna, Austria.
+\newblock \urlprefix\url{https://www.R-project.org/}.
+
+\bibitem[{Robinson(2014)}]{robinson2014broom}
+Robinson D (2014).
+\newblock \enquote{broom: An {R} package for converting statistical analysis objects into tidy data frames.}
+\newblock \emph{arXiv preprint arXiv:1412.3565}.
+\newblock \doi{10.48550/arXiv.1412.3565}.
+
+\bibitem[{Seth \emph{et~al.}(2015)Seth, Barrett, and Barnett}]{seth2015granger}
+Seth AK, Barrett AB, Barnett L (2015).
+\newblock \enquote{{G}ranger causality analysis in neuroscience and neuroimaging.}
+\newblock \emph{Journal of Neuroscience}, \textbf{35}(8), 3293--3297.
+\newblock \doi{10.1523/JNEUROSCI.4399-14.2015}.
+
+\bibitem[{Sims(1972)}]{sims1972money}
+Sims CA (1972).
+\newblock \enquote{Money, income, and causality.}
+\newblock \emph{The American Economic Review}, \textbf{62}(4), 540--552.
+
+\bibitem[{Sims(1980)}]{sims1980macroeconomics}
+Sims CA (1980).
+\newblock \enquote{Macroeconomics and reality.}
+\newblock \emph{Econometrica}, \textbf{48}(1), 1--48.
+\newblock \doi{10.2307/1912017}.
+
+\bibitem[{Toda and Yamamoto(1995)}]{toda1995statistical}
+Toda HY, Yamamoto T (1995).
+\newblock \enquote{Statistical inference in vector autoregressions with possibly integrated processes.}
+\newblock \emph{Journal of Econometrics}, \textbf{66}(1-2), 225--250.
+\newblock \doi{10.1016/0304-4076(94)01616-8}.
+
+\bibitem[{Wickham \emph{et~al.}(2019)Wickham, Averick, Bryan, Chang, McGowan, Fran{\c{c}}ois, Grolemund, Hayes, Henry, Hester \emph{et~al.}}]{wickham2019welcome}
+Wickham H, Averick M, Bryan J, Chang W, McGowan LD, Fran{\c{c}}ois R, Grolemund G, Hayes A, Henry L, Hester J, \emph{et~al.} (2019).
+\newblock \enquote{Welcome to the tidyverse.}
+\newblock \emph{Journal of Open Source Software}, \textbf{4}(43), 1686.
+\newblock \doi{10.21105/joss.01686}.
+
+\bibitem[{Wickham \emph{et~al.}(2024)Wickham, Hester, Chang, and Bryan}]{devtools}
+Wickham H, Hester J, Chang W, Bryan J (2024).
+\newblock \emph{devtools: Tools to Make Developing {R} Packages Easier}.
+\newblock R package version 2.4.5, \urlprefix\url{https://CRAN.R-project.org/package=devtools}.
+
+\bibitem[{Zeileis and Hothorn(2002)}]{lmtest}
+Zeileis A, Hothorn T (2002).
+\newblock \emph{lmtest: Testing Linear Regression Models}.
+\newblock R package version 0.9-40, \urlprefix\url{https://CRAN.R-project.org/package=lmtest}.
+
+\end{thebibliography}
