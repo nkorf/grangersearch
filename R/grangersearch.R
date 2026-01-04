@@ -582,7 +582,7 @@ granger_search <- function(.data, ..., lag = 1, alpha = 0.05, test = "F",
 
 
   # Add class for S3 methods - must be first for proper dispatch
-  class(output) <- c("granger_search_result", "data.frame")
+  class(output) <- c("granger_search_result", class(output))
 
   output
 }
