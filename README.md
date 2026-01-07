@@ -70,7 +70,7 @@ U -> e: U does not Granger-cause e (p = 0.2983)
 
 If you use this package, please cite:
 
-> Korfiatis, N. (2025). grangersearch: An R Package for Exhaustive Granger Causality Testing with Tidyverse Integration. arXiv preprint. https://arxiv.org/abs/2601.01604 (https://doi.org/10.48550/arXiv.2601.01604)
+> Korfiatis, N. (2025). grangersearch: An R Package for Exhaustive Granger Causality Testing with Tidyverse Integration. arXiv preprint. https://arxiv.org/abs/2601.01604
 
 ## Author
 
