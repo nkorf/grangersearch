@@ -1,4 +1,4 @@
-# grangersearch <img src="man/figures/logo.png" align="right" height="139" alt="grangersearch logo" />
+# grangeRsearch <img src="man/figures/logo.png" align="right" height="139" alt="grangersearch logo" />
 
 An R package for exhaustive Granger causality testing with tidyverse integration.
 
