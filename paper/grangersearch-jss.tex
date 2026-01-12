@@ -634,7 +634,14 @@ R> plot(dist, type = "density")
 \end{CodeInput}
 \end{CodeChunk}
 %
-This visualization helps researchers understand how GC strength varies across pairs and whether there are outliers with unusually strong predictive relationships.
+Figure~\ref{fig:distribution} shows the resulting density plot. The visualization helps researchers understand how GC strength varies across pairs and whether there are outliers with unusually strong predictive relationships. Each curve represents the distribution of GC strength values for a different lag order, allowing comparison of how predictive relationships change with the lag specification.
+
+\begin{figure}[t!]
+\centering
+\includegraphics[width=0.9\textwidth]{distribution_plot.pdf}
+\caption{Density plot of Granger causality strength values across all pairwise combinations in the Canada dataset for lag orders 1--3. Higher GC strength values indicate stronger predictive relationships. The rightward shift of distributions at higher lags reflects increased model complexity.}
+\label{fig:distribution}
+\end{figure}
 
 \subsection{Using differencing for stationarity}
 
