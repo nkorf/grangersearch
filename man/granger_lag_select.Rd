@@ -4,7 +4,15 @@
 \alias{granger_lag_select}
 \title{Lag Selection Analysis for Granger Causality}
 \usage{
-granger_lag_select(.data, ..., lag = 1:4, alpha = 0.05, test = "F")
+granger_lag_select(
+  .data,
+  ...,
+  lag = 1:4,
+  alpha = 0.05,
+  test = "F",
+  type = c("classic", "constrained"),
+  difference = FALSE
+)
 }
 \arguments{
 \item{.data}{A data frame or tibble containing the time series variables.}
@@ -17,6 +25,12 @@ If empty, all numeric columns are used.}
 \item{alpha}{Numeric. Significance level. Default is 0.05.}
 
 \item{test}{Character. Test type. Default is "F".}
+
+\item{type}{Character. Type of Granger causality: "classic" (default) or
+"constrained". See \code{\link[=granger_causality_test]{granger_causality_test()}} for details.}
+
+\item{difference}{Logical. If TRUE, apply first-order differencing before
+analysis. Default is FALSE.}
 }
 \value{
 A tibble with one row per (cause, effect, lag) combination:
@@ -26,6 +40,7 @@ A tibble with one row per (cause, effect, lag) combination:
 \item{lag}{Integer. The lag order tested.}
 \item{statistic}{Numeric. The F-test statistic.}
 \item{p.value}{Numeric. The p-value.}
+\item{gc_strength}{Numeric. The Granger causality strength (log variance ratio).}
 \item{significant}{Logical. Whether significant at alpha.}
 }
 }

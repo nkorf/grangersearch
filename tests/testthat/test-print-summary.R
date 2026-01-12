@@ -9,7 +9,7 @@ test_that("print method runs without error", {
 
   expect_output(print(result), "Granger Causality Test")
   expect_output(print(result), "Observations:")
-  expect_output(print(result), "Lag order:")
+  expect_output(print(result), "Lag:")
 })
 
 test_that("print method returns object invisibly", {

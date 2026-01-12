@@ -19,6 +19,7 @@ A tibble with columns:
 \item{effect}{Character. The name of the potential effect variable.}
 \item{statistic}{Numeric. The F-test statistic.}
 \item{p.value}{Numeric. The p-value of the test.}
+\item{gc_strength}{Numeric. The Granger causality strength (log variance ratio).}
 \item{significant}{Logical. Whether the result is significant at the alpha level.}
 }
 }

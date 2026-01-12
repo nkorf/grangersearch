@@ -15,6 +15,17 @@
 #'   Default is 0.05.
 #' @param test Character. Type of test to perform. Currently only "F" (F-test) is
 #'   supported. Default is "F".
+#' @param type Character. Type of Granger causality to compute:
+#'   \itemize{
+#'     \item `"classic"` (default): Uses all lagged values from 1 to `lag` in the
+#'       VAR model. This is the traditional Granger causality approach.
+#'     \item `"constrained"`: Uses only the single value at the specified `lag`,
+#'       not all values up to it. This approach has constant model complexity
+#'       regardless of lag and tends to overfit less (Dimitrakopoulos, 2024).
+#'   }
+#' @param difference Logical. If TRUE, apply first-order differencing to both
+#'   time series before analysis. This helps ensure stationarity, which is an
+#'   assumption of Granger causality tests. Default is FALSE.
 #'
 #' @return An object of class `granger_result` containing:
 #' \describe{
@@ -24,10 +35,16 @@
 #'   \item{p_value_yx}{Numeric. P-value for the test of Y causing X.}
 #'   \item{test_statistic_xy}{Numeric. Test statistic for X causing Y.}
 #'   \item{test_statistic_yx}{Numeric. Test statistic for Y causing X.}
+#'   \item{gc_strength_xy}{Numeric. Granger causality strength for X causing Y,
+#'     computed as log(Var(univariate residuals) / Var(bivariate residuals)).
+#'     Higher values indicate stronger predictive relationship.}
+#'   \item{gc_strength_yx}{Numeric. Granger causality strength for Y causing X.}
 #'   \item{lag}{Integer. The lag order used.}
 #'   \item{alpha}{Numeric. The significance level used.}
 #'   \item{test}{Character. The test type used.}
-#'   \item{n}{Integer. Number of observations.}
+#'   \item{type}{Character. The type of Granger causality ("classic" or "constrained").}
+#'   \item{difference}{Logical. Whether differencing was applied.}
+#'   \item{n}{Integer. Number of observations (after differencing if applied).}
 #'   \item{x_name}{Character. Name of the X variable.}
 #'   \item{y_name}{Character. Name of the Y variable.}
 #'   \item{call}{The matched call.}
@@ -36,15 +53,29 @@
 #' @details
 #' The Granger causality test is based on the idea that if X causes Y, then past
 #' values of X should contain information that helps predict Y above and beyond
-#' the information contained in past values of Y alone.
+#' the information contained in past values of Y alone (Granger, 1969).
 #'
-#' This function fits Vector Autoregressive (VAR) models using the \pkg{vars}
-#' package and performs F-tests to compare restricted and unrestricted models.
-#' The test is performed in both directions to detect unidirectional or
-#' bidirectional causality.
+#' For `type = "classic"`, this function fits Vector Autoregressive (VAR) models
+#' using the \pkg{vars} package and performs F-tests to compare restricted and
+#' unrestricted models. The test is performed in both directions to detect
+#' unidirectional or bidirectional causality.
+#'
+#' For `type = "constrained"`, the function uses a simplified approach that only
+#' considers the single lagged value at the specified lag (not all values from 1
+#' to lag). This constrained approach has constant model complexity regardless of
+#' the lag order and has been shown to overfit less than classic Granger causality,
+#' especially for larger lag values. The overfitting behavior of classic GC models
+#' is discussed in Shojaie & Fox (2022); the constrained formulation follows
+#' Dimitrakopoulos (2024).
+#'
+#' The `gc_strength` values provide a continuous measure of Granger causality
+#' magnitude, computed as log(Var(univariate) / Var(bivariate)). This formulation
+#' follows Barrett et al. (2010). Higher values indicate that adding the predictor
+#' variable substantially reduces prediction error variance.
 #'
 #' Note that Granger causality is a statistical concept based on prediction and
-#' temporal precedence. It does not necessarily imply true causal mechanisms.
+#' temporal precedence. It does not necessarily imply true causal mechanisms
+#' (Granger, 1980).
 #'
 #' @section Tidyverse Compatibility:
 #' This function supports tidyverse-style syntax:
@@ -65,6 +96,9 @@
 #' result <- granger_causality_test(x = x, y = y)
 #' print(result)
 #'
+#' # Access GC strength (continuous measure)
+#' result$gc_strength_xy
+#'
 #' # Tidyverse-style with data frame
 #' library(tibble)
 #' df <- tibble(
@@ -81,9 +115,30 @@
 #' # Different lag order
 #' df |> granger_causality_test(price, volume, lag = 2)
 #'
+#' # Use constrained Granger causality (less prone to overfitting)
+#' df |> granger_causality_test(price, volume, type = "constrained", lag = 3)
+#'
+#' # Apply differencing for stationarity
+#' df |> granger_causality_test(price, volume, difference = TRUE)
+#'
 #' @references
-#' Granger, C. W. J. (1969). Investigating Causal Relations by Econometric Models
-#' and Cross-spectral Methods. \emph{Econometrica}, 37(3), 424-438.
+#' Granger, C. W. J. (1969). Investigating causal relations by econometric models
+#' and cross-spectral methods. \emph{Econometrica}, 37(3), 424-438.
+#'
+#' Granger, C. W. J. (1980). Testing for causality: A personal viewpoint.
+#' \emph{Journal of Economic Dynamics and Control}, 2, 329-352.
+#'
+#' Barrett, A. B., Barnett, L., & Seth, A. K. (2010). Multivariate Granger causality
+#' and generalized variance. \emph{Physical Review E}, 81, 041907.
+#'
+#' Seth, A. K., Barrett, A. B., & Barnett, L. (2015). Granger causality analysis
+#' in neuroscience and neuroimaging. \emph{Journal of Neuroscience}, 35(8), 3293-3297.
+#'
+#' Shojaie, A., & Fox, E. B. (2022). Granger causality: A review and recent advances.
+#' \emph{Annual Review of Statistics and Its Application}, 9(1), 289-319.
+#'
+#' Dimitrakopoulos, P. S. (2024). Detecting Granger Causality. Master's Thesis,
+#' Eindhoven University of Technology.
 #'
 #' @seealso
 #' \code{\link[vars]{VAR}} for the underlying VAR model,
@@ -91,9 +146,12 @@
 #' [tidy.granger_result()] for tidying results.
 #'
 #' @importFrom rlang enquo eval_tidy as_label
-#' @importFrom stats complete.cases
+#' @importFrom stats complete.cases lm var pf
 #' @export
-granger_causality_test <- function(.data = NULL, x, y, lag = 1, alpha = 0.05, test = "F") {
+granger_causality_test <- function(.data = NULL, x, y, lag = 1, alpha = 0.05,
+                                    test = "F", type = c("classic", "constrained"),
+                                    difference = FALSE) {
+  type <- match.arg(type)
   call <- match.call()
 
   # Handle tidyverse-style NSE
@@ -142,11 +200,8 @@ granger_causality_test <- function(.data = NULL, x, y, lag = 1, alpha = 0.05, te
     stop("Currently only `test = 'F'` is supported.", call. = FALSE)
   }
 
-  n <- length(x_vec)
-  min_length <- 2 * lag + 2
-  if (n < min_length) {
-    stop(sprintf("Time series too short. Need at least %d observations for lag = %d.",
-                 min_length, lag), call. = FALSE)
+  if (!is.logical(difference) || length(difference) != 1) {
+    stop("`difference` must be TRUE or FALSE.", call. = FALSE)
   }
 
   if (any(is.na(x_vec)) || any(is.nan(x_vec)) || any(is.infinite(x_vec))) {
@@ -156,25 +211,124 @@ granger_causality_test <- function(.data = NULL, x, y, lag = 1, alpha = 0.05, te
     stop(sprintf("`%s` contains NA, NaN, or infinite values.", y_name), call. = FALSE)
   }
 
-  # Combine into matrix for VAR modeling
-  data_matrix <- cbind(X = x_vec, Y = y_vec)
+  # Apply differencing if requested (for stationarity)
+  if (difference) {
+    x_vec <- diff(x_vec)
+    y_vec <- diff(y_vec)
+  }
 
-  # Fit VAR model and perform causality tests
-  tryCatch({
-    var_model <- vars::VAR(data_matrix, p = lag, type = "const")
+  n <- length(x_vec)
+  min_length <- 2 * lag + 2
+  if (n < min_length) {
+    stop(sprintf("Time series too short. Need at least %d observations for lag = %d%s.",
+                 min_length, lag,
+                 if (difference) " (after differencing)" else ""), call. = FALSE)
+  }
 
-    # Test if X Granger-causes Y
-    causality_xy <- vars::causality(var_model, cause = "X")
-    p_value_xy <- causality_xy$Granger$p.value
-    test_stat_xy <- causality_xy$Granger$statistic
+  # Initialize results
+  p_value_xy <- NA_real_
+  p_value_yx <- NA_real_
+  test_stat_xy <- NA_real_
+  test_stat_yx <- NA_real_
+  gc_strength_xy <- NA_real_
+  gc_strength_yx <- NA_real_
 
-    # Test if Y Granger-causes X
-    causality_yx <- vars::causality(var_model, cause = "Y")
-    p_value_yx <- causality_yx$Granger$p.value
-    test_stat_yx <- causality_yx$Granger$statistic
-  }, error = function(e) {
-    stop(sprintf("VAR model fitting failed: %s", e$message), call. = FALSE)
-  })
+  if (type == "classic") {
+    # Classic Granger causality using VAR models
+    data_matrix <- cbind(X = x_vec, Y = y_vec)
+
+    tryCatch({
+      var_model <- vars::VAR(data_matrix, p = lag, type = "const")
+
+      # Test if X Granger-causes Y
+      causality_xy <- vars::causality(var_model, cause = "X")
+      p_value_xy <- causality_xy$Granger$p.value
+      test_stat_xy <- causality_xy$Granger$statistic
+
+      # Test if Y Granger-causes X
+      causality_yx <- vars::causality(var_model, cause = "Y")
+      p_value_yx <- causality_yx$Granger$p.value
+      test_stat_yx <- causality_yx$Granger$statistic
+
+      # Calculate GC strength from residual variances
+      # For X -> Y: compare Y equation with and without X lags
+      resid_y <- stats::residuals(var_model)[, "Y"]
+      var_bivariate_y <- stats::var(resid_y)
+
+      # Fit univariate AR model for Y
+      y_lagged <- stats::embed(y_vec, lag + 1)
+      y_response <- y_lagged[, 1]
+      y_predictors <- y_lagged[, -1, drop = FALSE]
+      uni_model_y <- stats::lm(y_response ~ y_predictors)
+      var_univariate_y <- stats::var(stats::residuals(uni_model_y))
+      gc_strength_xy <- log(var_univariate_y / var_bivariate_y)
+
+      # For Y -> X: compare X equation with and without Y lags
+      resid_x <- stats::residuals(var_model)[, "X"]
+      var_bivariate_x <- stats::var(resid_x)
+
+      x_lagged <- stats::embed(x_vec, lag + 1)
+      x_response <- x_lagged[, 1]
+      x_predictors <- x_lagged[, -1, drop = FALSE]
+      uni_model_x <- stats::lm(x_response ~ x_predictors)
+      var_univariate_x <- stats::var(stats::residuals(uni_model_x))
+      gc_strength_yx <- log(var_univariate_x / var_bivariate_x)
+
+    }, error = function(e) {
+      stop(sprintf("VAR model fitting failed: %s", e$message), call. = FALSE)
+    })
+
+  } else {
+    # Constrained Granger causality: only use value at lag q (not all 1:q)
+    # This has constant model complexity regardless of lag
+
+    # Create lagged variables at exactly lag q
+    effective_n <- n - lag
+    y_response <- y_vec[(lag + 1):n]
+    y_lag_q <- y_vec[1:effective_n]
+    x_lag_q <- x_vec[1:effective_n]
+
+    # Test X -> Y (does X help predict Y?)
+    # Univariate model: Y_t ~ Y_{t-q}
+    uni_model_xy <- stats::lm(y_response ~ y_lag_q)
+    resid_uni_xy <- stats::residuals(uni_model_xy)
+    var_uni_xy <- stats::var(resid_uni_xy)
+
+    # Bivariate model: Y_t ~ Y_{t-q} + X_{t-q}
+    bi_model_xy <- stats::lm(y_response ~ y_lag_q + x_lag_q)
+    resid_bi_xy <- stats::residuals(bi_model_xy)
+    var_bi_xy <- stats::var(resid_bi_xy)
+
+    # GC strength: log ratio of variances
+    gc_strength_xy <- log(var_uni_xy / var_bi_xy)
+
+    # F-test for X -> Y
+    # Compare nested models: does adding x_lag_q improve the model?
+    anova_xy <- stats::anova(uni_model_xy, bi_model_xy)
+    test_stat_xy <- anova_xy$F[2]
+    p_value_xy <- anova_xy$`Pr(>F)`[2]
+
+    # Test Y -> X (does Y help predict X?)
+    x_response <- x_vec[(lag + 1):n]
+
+    # Univariate model: X_t ~ X_{t-q}
+    uni_model_yx <- stats::lm(x_response ~ x_lag_q)
+    resid_uni_yx <- stats::residuals(uni_model_yx)
+    var_uni_yx <- stats::var(resid_uni_yx)
+
+    # Bivariate model: X_t ~ X_{t-q} + Y_{t-q}
+    bi_model_yx <- stats::lm(x_response ~ x_lag_q + y_lag_q)
+    resid_bi_yx <- stats::residuals(bi_model_yx)
+    var_bi_yx <- stats::var(resid_bi_yx)
+
+    # GC strength for Y -> X
+    gc_strength_yx <- log(var_uni_yx / var_bi_yx)
+
+    # F-test for Y -> X
+    anova_yx <- stats::anova(uni_model_yx, bi_model_yx)
+    test_stat_yx <- anova_yx$F[2]
+    p_value_yx <- anova_yx$`Pr(>F)`[2]
+  }
 
   # Build result object
   result <- list(
@@ -184,9 +338,13 @@ granger_causality_test <- function(.data = NULL, x, y, lag = 1, alpha = 0.05, te
     p_value_yx = as.numeric(p_value_yx),
     test_statistic_xy = as.numeric(test_stat_xy),
     test_statistic_yx = as.numeric(test_stat_yx),
+    gc_strength_xy = as.numeric(gc_strength_xy),
+    gc_strength_yx = as.numeric(gc_strength_yx),
     lag = lag,
     alpha = alpha,
     test = test,
+    type = type,
+    difference = difference,
     n = n,
     x_name = x_name,
     y_name = y_name,
@@ -210,8 +368,11 @@ print.granger_result <- function(x, ...) {
   cat("\nGranger Causality Test\n")
   cat("======================\n\n")
 
-  cat(sprintf("Observations: %d, Lag order: %d, Significance level: %.3f\n\n",
-              x$n, x$lag, x$alpha))
+  type_label <- if (!is.null(x$type) && x$type == "constrained") "constrained" else "classic"
+  diff_label <- if (!is.null(x$difference) && x$difference) ", differenced" else ""
+
+  cat(sprintf("Type: %s, Observations: %d, Lag: %d, Alpha: %.3f%s\n\n",
+              type_label, x$n, x$lag, x$alpha, diff_label))
 
   # X -> Y result
   xy_result <- if (x$x_causes_y) {
@@ -219,7 +380,10 @@ print.granger_result <- function(x, ...) {
   } else {
     sprintf("%s does not Granger-cause %s", x$x_name, x$y_name)
   }
-  cat(sprintf("%s -> %s: %s (p = %.4f)\n", x$x_name, x$y_name, xy_result, x$p_value_xy))
+  gc_xy <- if (!is.null(x$gc_strength_xy) && !is.na(x$gc_strength_xy)) {
+    sprintf(", GC = %.4f", x$gc_strength_xy)
+  } else ""
+  cat(sprintf("%s -> %s: %s (p = %.4f%s)\n", x$x_name, x$y_name, xy_result, x$p_value_xy, gc_xy))
 
   # Y -> X result
   yx_result <- if (x$y_causes_x) {
@@ -227,7 +391,10 @@ print.granger_result <- function(x, ...) {
   } else {
     sprintf("%s does not Granger-cause %s", x$y_name, x$x_name)
   }
-  cat(sprintf("%s -> %s: %s (p = %.4f)\n", x$y_name, x$x_name, yx_result, x$p_value_yx))
+  gc_yx <- if (!is.null(x$gc_strength_yx) && !is.na(x$gc_strength_yx)) {
+    sprintf(", GC = %.4f", x$gc_strength_yx)
+  } else ""
+  cat(sprintf("%s -> %s: %s (p = %.4f%s)\n", x$y_name, x$x_name, yx_result, x$p_value_yx, gc_yx))
 
   cat("\n")
   invisible(x)
@@ -250,11 +417,18 @@ summary.granger_result <- function(object, ...) {
   print(object$call)
   cat("\n")
 
+  type_label <- if (!is.null(object$type) && object$type == "constrained") "constrained" else "classic"
+
   cat(sprintf("Variables: %s, %s\n", object$x_name, object$y_name))
   cat(sprintf("Number of observations: %d\n", object$n))
-  cat(sprintf("VAR lag order: %d\n", object$lag))
+  cat(sprintf("Lag order: %d\n", object$lag))
+  cat(sprintf("GC type: %s\n", type_label))
   cat(sprintf("Test type: %s-test\n", object$test))
-  cat(sprintf("Significance level (alpha): %.3f\n\n", object$alpha))
+  cat(sprintf("Significance level (alpha): %.3f\n", object$alpha))
+  if (!is.null(object$difference) && object$difference) {
+    cat("Differencing: applied (first-order)\n")
+  }
+  cat("\n")
 
   cat("Results:\n")
   cat("--------\n\n")
@@ -262,6 +436,9 @@ summary.granger_result <- function(object, ...) {
   cat(sprintf("Test: %s Granger-causes %s\n", object$x_name, object$y_name))
   cat(sprintf("  Test statistic: %.4f\n", object$test_statistic_xy))
   cat(sprintf("  P-value: %.6f\n", object$p_value_xy))
+  if (!is.null(object$gc_strength_xy) && !is.na(object$gc_strength_xy)) {
+    cat(sprintf("  GC strength: %.4f\n", object$gc_strength_xy))
+  }
   cat(sprintf("  Conclusion: %s\n\n",
               if (object$x_causes_y) {
                 sprintf("REJECT null (%s causes %s)", object$x_name, object$y_name)
@@ -272,6 +449,9 @@ summary.granger_result <- function(object, ...) {
   cat(sprintf("Test: %s Granger-causes %s\n", object$y_name, object$x_name))
   cat(sprintf("  Test statistic: %.4f\n", object$test_statistic_yx))
   cat(sprintf("  P-value: %.6f\n", object$p_value_yx))
+  if (!is.null(object$gc_strength_yx) && !is.na(object$gc_strength_yx)) {
+    cat(sprintf("  GC strength: %.4f\n", object$gc_strength_yx))
+  }
   cat(sprintf("  Conclusion: %s\n\n",
               if (object$y_causes_x) {
                 sprintf("REJECT null (%s causes %s)", object$y_name, object$x_name)
@@ -315,6 +495,7 @@ summary.granger_result <- function(object, ...) {
 #'   \item{effect}{Character. The name of the potential effect variable.}
 #'   \item{statistic}{Numeric. The F-test statistic.}
 #'   \item{p.value}{Numeric. The p-value of the test.}
+#'   \item{gc_strength}{Numeric. The Granger causality strength (log variance ratio).}
 #'   \item{significant}{Logical. Whether the result is significant at the alpha level.}
 #' }
 #'
@@ -329,7 +510,10 @@ summary.granger_result <- function(object, ...) {
 #' @method tidy granger_result
 #' @export
 tidy.granger_result <- function(x, ...) {
-tibble::tibble(
+  gc_xy <- if (!is.null(x$gc_strength_xy)) x$gc_strength_xy else NA_real_
+  gc_yx <- if (!is.null(x$gc_strength_yx)) x$gc_strength_yx else NA_real_
+
+  tibble::tibble(
     direction = c(
       sprintf("%s -> %s", x$x_name, x$y_name),
       sprintf("%s -> %s", x$y_name, x$x_name)
@@ -338,6 +522,7 @@ tibble::tibble(
     effect = c(x$y_name, x$x_name),
     statistic = c(x$test_statistic_xy, x$test_statistic_yx),
     p.value = c(x$p_value_xy, x$p_value_yx),
+    gc_strength = c(gc_xy, gc_yx),
     significant = c(x$x_causes_y, x$y_causes_x)
   )
 }
@@ -357,6 +542,8 @@ tibble::tibble(
 #'   \item{lag}{Integer. VAR lag order used.}
 #'   \item{alpha}{Numeric. Significance level used.}
 #'   \item{test}{Character. Test type used.}
+#'   \item{type}{Character. GC type used ("classic" or "constrained").}
+#'   \item{difference}{Logical. Whether differencing was applied.}
 #'   \item{bidirectional}{Logical. TRUE if causality detected in both directions.}
 #'   \item{x_causes_y}{Logical. TRUE if x Granger-causes y.}
 #'   \item{y_causes_x}{Logical. TRUE if y Granger-causes x.}
@@ -373,11 +560,16 @@ tibble::tibble(
 #' @method glance granger_result
 #' @export
 glance.granger_result <- function(x, ...) {
+  type_val <- if (!is.null(x$type)) x$type else "classic"
+  diff_val <- if (!is.null(x$difference)) x$difference else FALSE
+
   tibble::tibble(
     nobs = x$n,
     lag = x$lag,
     alpha = x$alpha,
     test = x$test,
+    type = type_val,
+    difference = diff_val,
     bidirectional = x$x_causes_y && x$y_causes_x,
     x_causes_y = x$x_causes_y,
     y_causes_x = x$y_causes_x
@@ -399,6 +591,10 @@ glance.granger_result <- function(x, ...) {
 #'   best (lowest p-value) result is returned for each pair. Default is 1.
 #' @param alpha Numeric. Significance level for hypothesis testing. Default is 0.05.
 #' @param test Character. Test type, currently only "F" supported. Default is "F".
+#' @param type Character. Type of Granger causality: "classic" (default) or
+#'   "constrained". See [granger_causality_test()] for details.
+#' @param difference Logical. If TRUE, apply first-order differencing before
+#'   analysis. Default is FALSE.
 #' @param include_insignificant Logical. If FALSE (default), only return
 #'   significant causal relationships. If TRUE, return all pairwise results.
 #'
@@ -408,6 +604,7 @@ glance.granger_result <- function(x, ...) {
 #'   \item{effect}{Character. The potential effect variable name.}
 #'   \item{statistic}{Numeric. The F-test statistic.}
 #'   \item{p.value}{Numeric. The p-value of the test.}
+#'   \item{gc_strength}{Numeric. The Granger causality strength (log variance ratio).}
 #'   \item{significant}{Logical. Whether the result is significant at alpha.}
 #'   \item{lag}{Integer. The lag order used (best lag if multiple were tested).}
 #' }
@@ -455,13 +652,22 @@ glance.granger_result <- function(x, ...) {
 #' # Search with specific lag
 #' granger_search(df, lag = 2)
 #'
+#' # Use constrained Granger causality (less prone to overfitting)
+#' granger_search(df, type = "constrained")
+#'
+#' # Apply differencing for stationarity
+#' granger_search(df, difference = TRUE)
+#'
 #' @seealso [granger_causality_test()] for testing a single pair.
 #'
 #' @importFrom tibble tibble
 #' @importFrom rlang enquos eval_tidy as_label
 #' @export
 granger_search <- function(.data, ..., lag = 1, alpha = 0.05, test = "F",
+                           type = c("classic", "constrained"),
+                           difference = FALSE,
                            include_insignificant = FALSE) {
+  type <- match.arg(type)
 
   if (!is.data.frame(.data)) {
     stop("`.data` must be a data frame or tibble.", call. = FALSE)
@@ -472,6 +678,10 @@ granger_search <- function(.data, ..., lag = 1, alpha = 0.05, test = "F",
     stop("`lag` must be positive integer(s).", call. = FALSE)
   }
   lag <- as.integer(lag)
+
+  if (!is.logical(difference) || length(difference) != 1) {
+    stop("`difference` must be TRUE or FALSE.", call. = FALSE)
+  }
 
   # Handle column selection
   cols <- rlang::enquos(...)
@@ -528,7 +738,8 @@ granger_search <- function(.data, ..., lag = 1, alpha = 0.05, test = "F",
       tryCatch({
         result <- granger_causality_test(
           x = x_vec, y = y_vec,
-          lag = p, alpha = alpha, test = test
+          lag = p, alpha = alpha, test = test,
+          type = type, difference = difference
         )
 
         if (result$p_value_xy < best_p) {
@@ -538,6 +749,7 @@ granger_search <- function(.data, ..., lag = 1, alpha = 0.05, test = "F",
             effect = effect_var,
             statistic = result$test_statistic_xy,
             p.value = result$p_value_xy,
+            gc_strength = result$gc_strength_xy,
             significant = result$x_causes_y,
             lag = p
           )
@@ -554,6 +766,7 @@ granger_search <- function(.data, ..., lag = 1, alpha = 0.05, test = "F",
         effect = effect_var,
         statistic = NA_real_,
         p.value = NA_real_,
+        gc_strength = NA_real_,
         significant = NA,
         lag = lag[1]
       )
@@ -579,7 +792,8 @@ granger_search <- function(.data, ..., lag = 1, alpha = 0.05, test = "F",
   # Store metadata for potential use
   attr(output, "lags_tested") <- lag
   attr(output, "alpha") <- alpha
-
+  attr(output, "type") <- type
+  attr(output, "difference") <- difference
 
   # Add class for S3 methods - must be first for proper dispatch
   class(output) <- c("granger_search_result", class(output))
@@ -600,6 +814,10 @@ granger_search <- function(.data, ..., lag = 1, alpha = 0.05, test = "F",
 #' @param lag Integer vector. The lag orders to test. Default is `1:4`.
 #' @param alpha Numeric. Significance level. Default is 0.05.
 #' @param test Character. Test type. Default is "F".
+#' @param type Character. Type of Granger causality: "classic" (default) or
+#'   "constrained". See [granger_causality_test()] for details.
+#' @param difference Logical. If TRUE, apply first-order differencing before
+#'   analysis. Default is FALSE.
 #'
 #' @return A tibble with one row per (cause, effect, lag) combination:
 #' \describe{
@@ -608,6 +826,7 @@ granger_search <- function(.data, ..., lag = 1, alpha = 0.05, test = "F",
 #'   \item{lag}{Integer. The lag order tested.}
 #'   \item{statistic}{Numeric. The F-test statistic.}
 #'   \item{p.value}{Numeric. The p-value.}
+#'   \item{gc_strength}{Numeric. The Granger causality strength (log variance ratio).}
 #'   \item{significant}{Logical. Whether significant at alpha.}
 #' }
 #'
@@ -644,7 +863,10 @@ granger_search <- function(.data, ..., lag = 1, alpha = 0.05, test = "F",
 #'
 #' @importFrom tibble tibble
 #' @export
-granger_lag_select <- function(.data, ..., lag = 1:4, alpha = 0.05, test = "F") {
+granger_lag_select <- function(.data, ..., lag = 1:4, alpha = 0.05, test = "F",
+                                type = c("classic", "constrained"),
+                                difference = FALSE) {
+  type <- match.arg(type)
 
   if (!is.data.frame(.data)) {
     stop("`.data` must be a data frame or tibble.", call. = FALSE)
@@ -654,6 +876,10 @@ granger_lag_select <- function(.data, ..., lag = 1:4, alpha = 0.05, test = "F") 
     stop("`lag` must be positive integer(s).", call. = FALSE)
   }
   lag <- as.integer(lag)
+
+  if (!is.logical(difference) || length(difference) != 1) {
+    stop("`difference` must be TRUE or FALSE.", call. = FALSE)
+  }
 
   # Handle column selection
   cols <- rlang::enquos(...)
@@ -696,7 +922,8 @@ granger_lag_select <- function(.data, ..., lag = 1:4, alpha = 0.05, test = "F") 
       tryCatch({
         result <- granger_causality_test(
           x = x_vec, y = y_vec,
-          lag = p, alpha = alpha, test = test
+          lag = p, alpha = alpha, test = test,
+          type = type, difference = difference
         )
 
         results[[length(results) + 1]] <- tibble::tibble(
@@ -705,6 +932,7 @@ granger_lag_select <- function(.data, ..., lag = 1:4, alpha = 0.05, test = "F") 
           lag = p,
           statistic = result$test_statistic_xy,
           p.value = result$p_value_xy,
+          gc_strength = result$gc_strength_xy,
           significant = result$x_causes_y
         )
       }, error = function(e) {
@@ -714,6 +942,7 @@ granger_lag_select <- function(.data, ..., lag = 1:4, alpha = 0.05, test = "F") 
           lag = p,
           statistic = NA_real_,
           p.value = NA_real_,
+          gc_strength = NA_real_,
           significant = NA
         )
       })
@@ -722,6 +951,8 @@ granger_lag_select <- function(.data, ..., lag = 1:4, alpha = 0.05, test = "F") 
 
   output <- do.call(rbind, results)
   attr(output, "alpha") <- alpha
+  attr(output, "type") <- type
+  attr(output, "difference") <- difference
   class(output) <- c("granger_lag_select", class(output))
   output
 }
@@ -1025,7 +1256,7 @@ plot.granger_search_result <- function(x, type = c("pvalue", "significance", "st
 
             # Determine label
             if (type == "significance") {
-              label <- if (!is.na(sig_val) && sig_val > 0.5) "\u2713" else ""
+              label <- if (!is.na(sig_val) && sig_val > 0.5) "*" else ""
             } else if (!gradient && type == "pvalue") {
               # Show actual p-value when gradient is off
               label <- sprintf("%.3f", pval)
@@ -1089,6 +1320,386 @@ plot.granger_search_result <- function(x, type = c("pvalue", "significance", "st
         graphics::mtext("F-stat", side = 4, line = 2, cex = 0.8)
       }
     }
+  }
+
+  invisible(x)
+}
+
+
+#' Distribution Analysis of Granger Causality
+#'
+#' Computes Granger causality for all pairwise combinations and returns
+#' detailed distribution information. This is useful for understanding the
+#' overall pattern of causal relationships in a dataset.
+#'
+#' @param .data A data frame or tibble containing the time series variables.
+#' @param ... <[`tidy-select`][dplyr::dplyr_tidy_select]> Columns to include.
+#'   If empty, all numeric columns are used.
+#' @param lag Integer or integer vector. The lag order(s) to test. If a vector,
+#'   results are returned for each lag separately. Default is 1.
+#' @param type Character. Type of Granger causality: "classic" (default) or
+#'   "constrained". See [granger_causality_test()] for details.
+#' @param difference Logical. If TRUE, apply first-order differencing before
+#'   analysis. Default is FALSE.
+#'
+#' @return An object of class `granger_distribution` containing:
+#' \describe{
+#'   \item{data}{A tibble with all pairwise GC results including gc_strength values.}
+#'   \item{summary}{A tibble with summary statistics for each lag.}
+#'   \item{lag}{The lag(s) used.}
+#'   \item{type}{The type of GC computed.}
+#'   \item{difference}{Whether differencing was applied.}
+#'   \item{n_vars}{Number of variables analyzed.}
+#'   \item{n_pairs}{Number of directed pairs tested.}
+#' }
+#'
+#' @details
+#' This function is designed for exploratory analysis of Granger causality
+#' distributions across a dataset. It computes the GC strength (log variance
+#' ratio) for all directed pairs and provides summary statistics.
+#'
+#' The distribution analysis helps understand:
+#' \itemize{
+#'   \item The overall spread of GC values in the dataset
+#'   \item How GC distributions change across different lags
+#'   \item Whether there are outliers with unusually high GC values
+#' }
+#'
+#' @examples
+#' set.seed(123)
+#' n <- 100
+#' df <- data.frame(
+#'   A = cumsum(rnorm(n)),
+#'   B = cumsum(rnorm(n)),
+#'   C = cumsum(rnorm(n))
+#' )
+#' # Add causal structure
+#' df$B <- c(0, 0.7 * df$A[1:(n-1)]) + rnorm(n, sd = 0.5)
+#'
+#' # Analyze GC distribution
+#' dist <- granger_distribution(df)
+#' print(dist)
+#'
+#' # Visualize the distribution
+#' plot(dist)
+#'
+#' # Compare classic vs constrained across lags
+#' dist_classic <- granger_distribution(df, lag = 1:5, type = "classic")
+#' dist_constrained <- granger_distribution(df, lag = 1:5, type = "constrained")
+#'
+#' @seealso [granger_search()] for finding significant relationships,
+#'   [plot.granger_distribution()] for visualization.
+#'
+#' @importFrom tibble tibble
+#' @importFrom stats quantile median
+#' @export
+granger_distribution <- function(.data, ..., lag = 1,
+                                  type = c("classic", "constrained"),
+                                  difference = FALSE) {
+  type <- match.arg(type)
+
+  if (!is.data.frame(.data)) {
+    stop("`.data` must be a data frame or tibble.", call. = FALSE)
+  }
+
+  if (!is.numeric(lag) || any(lag < 1) || any(lag != as.integer(lag))) {
+    stop("`lag` must be positive integer(s).", call. = FALSE)
+  }
+  lag <- as.integer(lag)
+
+  if (!is.logical(difference) || length(difference) != 1) {
+    stop("`difference` must be TRUE or FALSE.", call. = FALSE)
+  }
+
+  # Handle column selection
+  cols <- rlang::enquos(...)
+
+  if (length(cols) == 0) {
+    var_names <- names(.data)[sapply(.data, is.numeric)]
+    if (length(var_names) < 2) {
+      stop("Need at least 2 numeric columns.", call. = FALSE)
+    }
+  } else {
+    var_names <- character()
+    for (col in cols) {
+      var_names <- c(var_names, rlang::as_label(col))
+    }
+    for (v in var_names) {
+      if (!v %in% names(.data)) {
+        stop(sprintf("Column `%s` not found.", v), call. = FALSE)
+      }
+      if (!is.numeric(.data[[v]])) {
+        stop(sprintf("Column `%s` must be numeric.", v), call. = FALSE)
+      }
+    }
+  }
+
+  n_vars <- length(var_names)
+
+  # Generate all pairs
+  pairs <- expand.grid(cause = var_names, effect = var_names,
+                       stringsAsFactors = FALSE)
+  pairs <- pairs[pairs$cause != pairs$effect, ]
+  n_pairs <- nrow(pairs)
+
+  # Compute GC for all pairs at all lags
+  results <- list()
+
+  for (i in seq_len(nrow(pairs))) {
+    cause_var <- pairs$cause[i]
+    effect_var <- pairs$effect[i]
+    x_vec <- .data[[cause_var]]
+    y_vec <- .data[[effect_var]]
+
+    for (p in lag) {
+      tryCatch({
+        result <- granger_causality_test(
+          x = x_vec, y = y_vec,
+          lag = p, alpha = 0.05, test = "F",
+          type = type, difference = difference
+        )
+
+        results[[length(results) + 1]] <- tibble::tibble(
+          cause = cause_var,
+          effect = effect_var,
+          lag = p,
+          gc_strength = result$gc_strength_xy,
+          p.value = result$p_value_xy,
+          statistic = result$test_statistic_xy
+        )
+      }, error = function(e) {
+        results[[length(results) + 1]] <<- tibble::tibble(
+          cause = cause_var,
+          effect = effect_var,
+          lag = p,
+          gc_strength = NA_real_,
+          p.value = NA_real_,
+          statistic = NA_real_
+        )
+      })
+    }
+  }
+
+  data <- do.call(rbind, results)
+
+  # Compute summary statistics by lag
+  summary_list <- lapply(lag, function(p) {
+    subset_data <- data[data$lag == p & !is.na(data$gc_strength), ]
+    gc_vals <- subset_data$gc_strength
+
+    if (length(gc_vals) > 0) {
+      tibble::tibble(
+        lag = p,
+        n = length(gc_vals),
+        mean = mean(gc_vals),
+        median = stats::median(gc_vals),
+        sd = stats::sd(gc_vals),
+        min = min(gc_vals),
+        max = max(gc_vals),
+        q25 = stats::quantile(gc_vals, 0.25),
+        q75 = stats::quantile(gc_vals, 0.75)
+      )
+    } else {
+      tibble::tibble(
+        lag = p,
+        n = 0L,
+        mean = NA_real_,
+        median = NA_real_,
+        sd = NA_real_,
+        min = NA_real_,
+        max = NA_real_,
+        q25 = NA_real_,
+        q75 = NA_real_
+      )
+    }
+  })
+  summary_data <- do.call(rbind, summary_list)
+
+  result <- list(
+    data = data,
+    summary = summary_data,
+    lag = lag,
+    type = type,
+    difference = difference,
+    n_vars = n_vars,
+    n_pairs = n_pairs
+  )
+
+  class(result) <- "granger_distribution"
+  result
+}
+
+
+#' Print Method for granger_distribution Objects
+#'
+#' @param x A `granger_distribution` object.
+#' @param ... Additional arguments (ignored).
+#'
+#' @return Invisibly returns the input object.
+#'
+#' @export
+print.granger_distribution <- function(x, ...) {
+  cat("\nGranger Causality Distribution Analysis\n")
+  cat("========================================\n\n")
+
+  cat(sprintf("Type: %s\n", x$type))
+  cat(sprintf("Variables: %d, Directed pairs: %d\n", x$n_vars, x$n_pairs))
+  if (x$difference) {
+    cat("Differencing: applied\n")
+  }
+  cat(sprintf("Lag(s) tested: %s\n\n", paste(x$lag, collapse = ", ")))
+
+  cat("Summary statistics (GC strength):\n")
+  cat("---------------------------------\n")
+  print(x$summary)
+
+  cat("\n")
+  invisible(x)
+}
+
+
+#' Plot Granger Causality Distribution
+#'
+#' Creates visualizations of the Granger causality strength distribution.
+#'
+#' @param x A `granger_distribution` object from [granger_distribution()].
+#' @param type Character. Type of plot: "histogram" (default), "density", or "violin".
+#' @param ... Additional arguments (ignored).
+#'
+#' @return Invisibly returns the input object.
+#'
+#' @details
+#' For multiple lags:
+#' \itemize{
+#'   \item "histogram": Faceted histograms by lag
+#'   \item "density": Overlaid density curves colored by lag
+#'   \item "violin": Violin plots comparing distributions across lags
+#' }
+#'
+#' @examples
+#' set.seed(123)
+#' df <- data.frame(
+#'   A = cumsum(rnorm(100)),
+#'   B = cumsum(rnorm(100)),
+#'   C = cumsum(rnorm(100))
+#' )
+#' df$B <- c(0, 0.7 * df$A[1:99]) + rnorm(100, sd = 0.5)
+#'
+#' dist <- granger_distribution(df, lag = 1:3)
+#' plot(dist)
+#' plot(dist, type = "density")
+#' plot(dist, type = "violin")
+#'
+#' @export
+plot.granger_distribution <- function(x, type = c("histogram", "density", "violin"), ...) {
+  type <- match.arg(type)
+
+  data <- x$data[!is.na(x$data$gc_strength), ]
+  n_lags <- length(x$lag)
+
+  if (nrow(data) == 0) {
+    message("No valid GC values to plot.")
+    return(invisible(x))
+  }
+
+  old_par <- graphics::par(no.readonly = TRUE)
+  on.exit(graphics::par(old_par))
+
+  if (type == "histogram") {
+    if (n_lags > 1) {
+      n_cols <- min(3, n_lags)
+      n_rows <- ceiling(n_lags / n_cols)
+      graphics::par(mfrow = c(n_rows, n_cols), mar = c(4, 4, 3, 1))
+    }
+
+    for (p in x$lag) {
+      subset_data <- data[data$lag == p, ]
+      gc_vals <- subset_data$gc_strength
+
+      if (length(gc_vals) > 0) {
+        graphics::hist(
+          gc_vals,
+          main = sprintf("Lag = %d (%s)", p, x$type),
+          xlab = "GC Strength (log variance ratio)",
+          col = "steelblue",
+          border = "white",
+          breaks = "Sturges"
+        )
+        graphics::abline(v = mean(gc_vals), col = "red", lwd = 2, lty = 2)
+        graphics::abline(v = 0, col = "gray50", lwd = 1, lty = 3)
+      }
+    }
+
+  } else if (type == "density") {
+    colors <- grDevices::rainbow(n_lags)
+
+    # Get overall range
+    all_gc <- data$gc_strength
+    x_range <- range(all_gc)
+
+    graphics::plot(
+      x_range, c(0, 1),
+      type = "n",
+      xlab = "GC Strength (log variance ratio)",
+      ylab = "Density",
+      main = sprintf("GC Distribution by Lag (%s)", x$type)
+    )
+
+    max_density <- 0
+    densities <- list()
+
+    for (i in seq_along(x$lag)) {
+      p <- x$lag[i]
+      subset_data <- data[data$lag == p, ]
+      gc_vals <- subset_data$gc_strength
+
+      if (length(gc_vals) > 1) {
+        d <- stats::density(gc_vals)
+        densities[[i]] <- d
+        max_density <- max(max_density, max(d$y))
+      }
+    }
+
+    # Replot with correct y-axis
+    graphics::plot(
+      x_range, c(0, max_density * 1.1),
+      type = "n",
+      xlab = "GC Strength (log variance ratio)",
+      ylab = "Density",
+      main = sprintf("GC Distribution by Lag (%s)", x$type)
+    )
+
+    for (i in seq_along(densities)) {
+      if (!is.null(densities[[i]])) {
+        graphics::lines(densities[[i]], col = colors[i], lwd = 2)
+      }
+    }
+
+    graphics::abline(v = 0, col = "gray50", lwd = 1, lty = 3)
+
+    graphics::legend(
+      "topright",
+      legend = paste("Lag", x$lag),
+      col = colors,
+      lwd = 2,
+      cex = 0.8,
+      bg = "white"
+    )
+
+  } else if (type == "violin") {
+    # Simple boxplot-based visualization (violin requires additional packages)
+    data$lag_factor <- factor(data$lag, levels = x$lag)
+
+    graphics::boxplot(
+      gc_strength ~ lag_factor,
+      data = data,
+      main = sprintf("GC Distribution by Lag (%s)", x$type),
+      xlab = "Lag",
+      ylab = "GC Strength (log variance ratio)",
+      col = "steelblue",
+      border = "darkblue"
+    )
+    graphics::abline(h = 0, col = "gray50", lwd = 1, lty = 3)
   }
 
   invisible(x)

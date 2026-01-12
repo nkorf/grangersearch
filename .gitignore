@@ -4,3 +4,7 @@
 .Ruserdata
 *.Rproj
 CLAUDE.md
+Rplots.pdf
+*.Rcheck
+*.tar.gz
+_literature/

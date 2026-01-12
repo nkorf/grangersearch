@@ -6,6 +6,8 @@
 \alias{grangersearch-package}
 \title{grangersearch: Granger Causality Testing for Time Series}
 \description{
+\if{html}{\figure{logo.png}{options: style='float: right' alt='logo' width='120'}}
+
 Performs Granger causality tests on pairs of time series to determine causal relationships. Uses Vector Autoregressive (VAR) models to test whether one time series helps predict another beyond what the series' own past values provide. Returns structured results including p-values, test statistics, and causality conclusions for both directions.
 }
 \seealso{
@@ -17,7 +19,7 @@ Useful links:
 
 }
 \author{
-\strong{Maintainer}: Nikolaos Korfiatis \email{n.korfiatis@uea.ac.uk}
+\strong{Maintainer}: Nikolaos Korfiatis \email{nkorf@ionio.gr} (\href{https://orcid.org/0000-0001-6377-4837}{ORCID})
 
 }
 \keyword{internal}

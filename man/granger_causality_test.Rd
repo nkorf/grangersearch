@@ -4,7 +4,16 @@
 \alias{granger_causality_test}
 \title{Perform a Granger Causality Test on Two Time Series}
 \usage{
-granger_causality_test(.data = NULL, x, y, lag = 1, alpha = 0.05, test = "F")
+granger_causality_test(
+  .data = NULL,
+  x,
+  y,
+  lag = 1,
+  alpha = 0.05,
+  test = "F",
+  type = c("classic", "constrained"),
+  difference = FALSE
+)
 }
 \arguments{
 \item{.data}{A data frame, tibble, or NULL. If provided, \code{x} and \code{y} are
@@ -23,6 +32,19 @@ Default is 0.05.}
 
 \item{test}{Character. Type of test to perform. Currently only "F" (F-test) is
 supported. Default is "F".}
+
+\item{type}{Character. Type of Granger causality to compute:
+\itemize{
+\item \code{"classic"} (default): Uses all lagged values from 1 to \code{lag} in the
+VAR model. This is the traditional Granger causality approach.
+\item \code{"constrained"}: Uses only the single value at the specified \code{lag},
+not all values up to it. This approach has constant model complexity
+regardless of lag and tends to overfit less (Dimitrakopoulos, 2024).
+}}
+
+\item{difference}{Logical. If TRUE, apply first-order differencing to both
+time series before analysis. This helps ensure stationarity, which is an
+assumption of Granger causality tests. Default is FALSE.}
 }
 \value{
 An object of class \code{granger_result} containing:
@@ -33,10 +55,16 @@ An object of class \code{granger_result} containing:
 \item{p_value_yx}{Numeric. P-value for the test of Y causing X.}
 \item{test_statistic_xy}{Numeric. Test statistic for X causing Y.}
 \item{test_statistic_yx}{Numeric. Test statistic for Y causing X.}
+\item{gc_strength_xy}{Numeric. Granger causality strength for X causing Y,
+computed as log(Var(univariate residuals) / Var(bivariate residuals)).
+Higher values indicate stronger predictive relationship.}
+\item{gc_strength_yx}{Numeric. Granger causality strength for Y causing X.}
 \item{lag}{Integer. The lag order used.}
 \item{alpha}{Numeric. The significance level used.}
 \item{test}{Character. The test type used.}
-\item{n}{Integer. Number of observations.}
+\item{type}{Character. The type of Granger causality ("classic" or "constrained").}
+\item{difference}{Logical. Whether differencing was applied.}
+\item{n}{Integer. Number of observations (after differencing if applied).}
 \item{x_name}{Character. Name of the X variable.}
 \item{y_name}{Character. Name of the Y variable.}
 \item{call}{The matched call.}
@@ -50,15 +78,29 @@ beyond what past values of Y alone provide.
 \details{
 The Granger causality test is based on the idea that if X causes Y, then past
 values of X should contain information that helps predict Y above and beyond
-the information contained in past values of Y alone.
+the information contained in past values of Y alone (Granger, 1969).
 
-This function fits Vector Autoregressive (VAR) models using the \pkg{vars}
-package and performs F-tests to compare restricted and unrestricted models.
-The test is performed in both directions to detect unidirectional or
-bidirectional causality.
+For \code{type = "classic"}, this function fits Vector Autoregressive (VAR) models
+using the \pkg{vars} package and performs F-tests to compare restricted and
+unrestricted models. The test is performed in both directions to detect
+unidirectional or bidirectional causality.
+
+For \code{type = "constrained"}, the function uses a simplified approach that only
+considers the single lagged value at the specified lag (not all values from 1
+to lag). This constrained approach has constant model complexity regardless of
+the lag order and has been shown to overfit less than classic Granger causality,
+especially for larger lag values. The overfitting behavior of classic GC models
+is discussed in Shojaie & Fox (2022); the constrained formulation follows
+Dimitrakopoulos (2024).
+
+The \code{gc_strength} values provide a continuous measure of Granger causality
+magnitude, computed as log(Var(univariate) / Var(bivariate)). This formulation
+follows Barrett et al. (2010). Higher values indicate that adding the predictor
+variable substantially reduces prediction error variance.
 
 Note that Granger causality is a statistical concept based on prediction and
-temporal precedence. It does not necessarily imply true causal mechanisms.
+temporal precedence. It does not necessarily imply true causal mechanisms
+(Granger, 1980).
 }
 \section{Tidyverse Compatibility}{
 
@@ -81,6 +123,9 @@ y <- c(0, x[1:(n-1)]) + rnorm(n, sd = 0.5)
 result <- granger_causality_test(x = x, y = y)
 print(result)
 
+# Access GC strength (continuous measure)
+result$gc_strength_xy
+
 # Tidyverse-style with data frame
 library(tibble)
 df <- tibble(
@@ -97,10 +142,31 @@ result |> tidy()
 # Different lag order
 df |> granger_causality_test(price, volume, lag = 2)
 
+# Use constrained Granger causality (less prone to overfitting)
+df |> granger_causality_test(price, volume, type = "constrained", lag = 3)
+
+# Apply differencing for stationarity
+df |> granger_causality_test(price, volume, difference = TRUE)
+
 }
 \references{
-Granger, C. W. J. (1969). Investigating Causal Relations by Econometric Models
-and Cross-spectral Methods. \emph{Econometrica}, 37(3), 424-438.
+Granger, C. W. J. (1969). Investigating causal relations by econometric models
+and cross-spectral methods. \emph{Econometrica}, 37(3), 424-438.
+
+Granger, C. W. J. (1980). Testing for causality: A personal viewpoint.
+\emph{Journal of Economic Dynamics and Control}, 2, 329-352.
+
+Barrett, A. B., Barnett, L., & Seth, A. K. (2010). Multivariate Granger causality
+and generalized variance. \emph{Physical Review E}, 81, 041907.
+
+Seth, A. K., Barrett, A. B., & Barnett, L. (2015). Granger causality analysis
+in neuroscience and neuroimaging. \emph{Journal of Neuroscience}, 35(8), 3293-3297.
+
+Shojaie, A., & Fox, E. B. (2022). Granger causality: A review and recent advances.
+\emph{Annual Review of Statistics and Its Application}, 9(1), 289-319.
+
+Dimitrakopoulos, P. S. (2024). Detecting Granger Causality. Master's Thesis,
+Eindhoven University of Technology.
 }
 \seealso{
 \code{\link[vars]{VAR}} for the underlying VAR model,

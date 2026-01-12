@@ -10,6 +10,8 @@ granger_search(
   lag = 1,
   alpha = 0.05,
   test = "F",
+  type = c("classic", "constrained"),
+  difference = FALSE,
   include_insignificant = FALSE
 )
 }
@@ -27,6 +29,12 @@ best (lowest p-value) result is returned for each pair. Default is 1.}
 
 \item{test}{Character. Test type, currently only "F" supported. Default is "F".}
 
+\item{type}{Character. Type of Granger causality: "classic" (default) or
+"constrained". See \code{\link[=granger_causality_test]{granger_causality_test()}} for details.}
+
+\item{difference}{Logical. If TRUE, apply first-order differencing before
+analysis. Default is FALSE.}
+
 \item{include_insignificant}{Logical. If FALSE (default), only return
 significant causal relationships. If TRUE, return all pairwise results.}
 }
@@ -37,6 +45,7 @@ A tibble with one row per directed pair tested, containing:
 \item{effect}{Character. The potential effect variable name.}
 \item{statistic}{Numeric. The F-test statistic.}
 \item{p.value}{Numeric. The p-value of the test.}
+\item{gc_strength}{Numeric. The Granger causality strength (log variance ratio).}
 \item{significant}{Logical. Whether the result is significant at alpha.}
 \item{lag}{Integer. The lag order used (best lag if multiple were tested).}
 }
@@ -90,6 +99,12 @@ granger_search(df, lag = 1:4)
 
 # Search with specific lag
 granger_search(df, lag = 2)
+
+# Use constrained Granger causality (less prone to overfitting)
+granger_search(df, type = "constrained")
+
+# Apply differencing for stationarity
+granger_search(df, difference = TRUE)
 
 }
 \seealso{

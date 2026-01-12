@@ -18,6 +18,8 @@ A tibble with one row and columns:
 \item{lag}{Integer. VAR lag order used.}
 \item{alpha}{Numeric. Significance level used.}
 \item{test}{Character. Test type used.}
+\item{type}{Character. GC type used ("classic" or "constrained").}
+\item{difference}{Logical. Whether differencing was applied.}
 \item{bidirectional}{Logical. TRUE if causality detected in both directions.}
 \item{x_causes_y}{Logical. TRUE if x Granger-causes y.}
 \item{y_causes_x}{Logical. TRUE if y Granger-causes x.}
