@@ -1,4 +1,4 @@
-# grangersearch <img src="man/figures/logo.png" align="right" height="139" alt="grangersearch logo" />
+# grangeRsearch <img src="man/figures/logo.png" align="right" height="139" alt="grangersearch logo" />
 
 An R package for exhaustive Granger causality testing with tidyverse integration.
 
@@ -87,7 +87,7 @@ U -> e:   U does not Granger-cause e (p = 0.2983, strength = 0.030)
 
 If you use this package, please cite:
 
-> Korfiatis, N. (2025). grangersearch: An R Package for Exhaustive Granger Causality Testing with Tidyverse Integration. arXiv preprint. https://arxiv.org/abs/XXXX.XXXXX
+> Korfiatis, N. (2026). grangersearch: An R Package for Exhaustive Granger Causality Testing with Tidyverse Integration. arXiv preprint. https://arxiv.org/abs/2601.01604
 
 ## Author
 
