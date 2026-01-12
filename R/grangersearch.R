@@ -1092,6 +1092,8 @@ print.granger_search_result <- function(x, ...) {
 #'   and actual p-values are displayed in cells when `type = "pvalue"`.
 #' @param monochrome Logical. If TRUE, uses grayscale palette instead of blue.
 #'   Suitable for publications. Default FALSE.
+#' @param show_metric Character. Additional metric to show in parentheses:
+#'   "none" (default), "pvalue", or "strength" (GC strength).
 #' @param ... Additional arguments (ignored).
 #'
 #' @return Invisibly returns the input object.
@@ -1137,8 +1139,10 @@ print.granger_search_result <- function(x, ...) {
 #' @export
 plot.granger_search_result <- function(x, type = c("pvalue", "significance", "statistic"),
                                         show_values = TRUE, gradient = TRUE,
-                                        monochrome = FALSE, ...) {
+                                        monochrome = FALSE,
+                                        show_metric = c("none", "pvalue", "strength"), ...) {
   type <- match.arg(type)
+  show_metric <- match.arg(show_metric)
   alpha <- attr(x, "alpha") %||% 0.05
 
   # Get unique variables
@@ -1154,6 +1158,8 @@ plot.granger_search_result <- function(x, type = c("pvalue", "significance", "st
                      dimnames = list(all_vars, all_vars))
   mat_sig <- matrix(NA, nrow = n_vars, ncol = n_vars,
                     dimnames = list(all_vars, all_vars))
+  mat_strength <- matrix(NA, nrow = n_vars, ncol = n_vars,
+                         dimnames = list(all_vars, all_vars))
 
   # Fill matrices
   for (i in seq_len(nrow(x))) {
@@ -1162,6 +1168,9 @@ plot.granger_search_result <- function(x, type = c("pvalue", "significance", "st
 
     mat_pval[cause, effect] <- x$p.value[i]
     mat_sig[cause, effect] <- as.numeric(x$significant[i])
+    if ("gc_strength" %in% names(x)) {
+      mat_strength[cause, effect] <- x$gc_strength[i]
+    }
 
     if (type == "pvalue") {
       pval <- x$p.value[i]
@@ -1179,17 +1188,20 @@ plot.granger_search_result <- function(x, type = c("pvalue", "significance", "st
   mat_yx <- t(mat_xy)
   mat_pval_yx <- t(mat_pval)
   mat_sig_yx <- t(mat_sig)
+  mat_strength_yx <- t(mat_strength)
 
   # Calculate max value for color scaling (same scale for both)
   max_val <- max(mat_xy, na.rm = TRUE)
   if (is.na(max_val) || max_val <= 0) max_val <- 1
 
-  # Set up layout: two panels (+ optional color legend)
+  # Set up layout: two panels (+ optional color legend at bottom)
   old_par <- graphics::par(no.readonly = TRUE)
   on.exit(graphics::par(old_par))
 
   if (gradient) {
-    graphics::layout(matrix(c(1, 2, 3), nrow = 1), widths = c(4.5, 3.5, 1.2))
+    # Layout: horizontal legend on top, two heatmaps on bottom row
+    graphics::layout(matrix(c(3, 3, 1, 2), nrow = 2, byrow = TRUE),
+                     widths = c(1.3, 1), heights = c(0.5, 10))
   } else {
     # No legend needed when gradient is off
     # Left panel wider to accommodate y-axis labels
@@ -1310,36 +1322,32 @@ plot.granger_search_result <- function(x, type = c("pvalue", "significance", "st
              expression(bold("Column") %->% bold("Row")),
              show_y_labels = FALSE)
 
-  # Color legend (only when gradient is enabled)
+  # Color legend (only when gradient is enabled) - horizontal at top
   if (gradient) {
-    graphics::par(mar = c(5.5, 0.5, 3, 3))
+    graphics::par(mar = c(0.1, 6, 1.5, 6))
 
     if (type == "significance") {
-      graphics::image(1, c(0.25, 0.75), matrix(c(0, 1), ncol = 2),
+      graphics::image(c(0.25, 0.75), 1, matrix(c(0, 1), nrow = 2),
                       col = colors, axes = FALSE, xlab = "", ylab = "")
-      graphics::box()
-      graphics::axis(4, at = c(0.25, 0.75), labels = c("Not\nSig.", "Sig."),
-                     las = 1, cex.axis = 0.75, tick = FALSE, line = -0.5)
+      graphics::axis(3, at = c(0.25, 0.75), labels = c("Not Sig.", "Sig."),
+                     cex.axis = 0.6, tick = FALSE, line = -0.5)
     } else {
       legend_seq <- seq(0, max_val, length.out = n_colors)
-      graphics::image(1, legend_seq, matrix(legend_seq, ncol = length(legend_seq)),
+      graphics::image(legend_seq, 1, matrix(legend_seq, nrow = length(legend_seq)),
                       col = colors, axes = FALSE, xlab = "", ylab = "")
-      graphics::box()
 
       pretty_ticks <- pretty(c(0, max_val), n = 5)
       pretty_ticks <- pretty_ticks[pretty_ticks >= 0 & pretty_ticks <= max_val]
-      graphics::axis(4, at = pretty_ticks, las = 1, cex.axis = 0.75)
+      graphics::axis(3, at = pretty_ticks, cex.axis = 0.6)
 
       if (type == "pvalue") {
-        graphics::mtext(expression(-log[10](p)), side = 4, line = 2, cex = 0.8)
+        graphics::mtext(expression(-log[10](p)), side = 3, line = 0.8, cex = 0.65)
         sig_threshold <- -log10(alpha)
         if (sig_threshold <= max_val) {
-          graphics::abline(h = sig_threshold, col = "red", lty = 2, lwd = 1.5)
-          graphics::text(1.5, sig_threshold, sprintf("p=%.2f", alpha),
-                         col = "red", cex = 0.6, xpd = TRUE, pos = 4)
+          graphics::abline(v = sig_threshold, col = "red", lty = 2, lwd = 1.5)
         }
       } else {
-        graphics::mtext("F-stat", side = 4, line = 2, cex = 0.8)
+        graphics::mtext("F-stat", side = 3, line = 0.8, cex = 0.65)
       }
     }
   }

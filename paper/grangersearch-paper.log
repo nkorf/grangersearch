@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.28 (TeX Live 2025) (preloaded format=pdflatex 2025.12.22)  2 JAN 2026 20:06
+This is pdfTeX, Version 3.141592653-2.6-1.40.28 (TeX Live 2025) (preloaded format=pdflatex 2025.12.22)  2 JAN 2026 20:18
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -346,31 +346,31 @@ File: l3backend-pdftex.def 2025-10-09 L3 backend support: PDF output (pdfTeX)
 ) (./grangersearch-paper.aux)
 \openout1 = `grangersearch-paper.aux'.
 
-LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 59.
-LaTeX Font Info:    ... okay on input line 59.
-LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 59.
-LaTeX Font Info:    ... okay on input line 59.
-LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 59.
-LaTeX Font Info:    ... okay on input line 59.
-LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 59.
-LaTeX Font Info:    ... okay on input line 59.
-LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 59.
-LaTeX Font Info:    ... okay on input line 59.
-LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 59.
-LaTeX Font Info:    ... okay on input line 59.
-LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 59.
-LaTeX Font Info:    ... okay on input line 59.
-LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 59.
-LaTeX Font Info:    ... okay on input line 59.
-LaTeX Font Info:    Checking defaults for PU/pdf/m/n on input line 59.
-LaTeX Font Info:    ... okay on input line 59.
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 60.
+LaTeX Font Info:    ... okay on input line 60.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 60.
+LaTeX Font Info:    ... okay on input line 60.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 60.
+LaTeX Font Info:    ... okay on input line 60.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 60.
+LaTeX Font Info:    ... okay on input line 60.
+LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 60.
+LaTeX Font Info:    ... okay on input line 60.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 60.
+LaTeX Font Info:    ... okay on input line 60.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 60.
+LaTeX Font Info:    ... okay on input line 60.
+LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 60.
+LaTeX Font Info:    ... okay on input line 60.
+LaTeX Font Info:    Checking defaults for PU/pdf/m/n on input line 60.
+LaTeX Font Info:    ... okay on input line 60.
  (/Users/nkorf/Library/TinyTeX/texmf-dist/tex/latex/epstopdf-pkg/epstopdf-base.sty
 Package: epstopdf-base 2020-01-24 v2.11 Base part for package epstopdf
 Package epstopdf-base Info: Redefining graphics rule for `.eps' on input line 485.
  (/Users/nkorf/Library/TinyTeX/texmf-dist/tex/latex/latexconfig/epstopdf-sys.cfg
 File: epstopdf-sys.cfg 2010/07/13 v1.3 Configuration of (r)epstopdf for TeX Live
 ))
-Package hyperref Info: Link coloring OFF on input line 59.
+Package hyperref Info: Link coloring OFF on input line 60.
  (./grangersearch-paper.out) (./grangersearch-paper.out)
 \@outlinefile=\write3
 \openout3 = `grangersearch-paper.out'.
@@ -411,11 +411,11 @@ Package hyperref Info: Link coloring OFF on input line 59.
 * \@reversemarginfalse
 * (1in=72.27pt=25.4mm, 1cm=28.453pt)
 
-LaTeX Font Info:    Trying to load font information for U+msa on input line 62.
+LaTeX Font Info:    Trying to load font information for U+msa on input line 63.
 (/Users/nkorf/Library/TinyTeX/texmf-dist/tex/latex/amsfonts/umsa.fd
 File: umsa.fd 2013/01/14 v3.01 AMS symbols A
 )
-LaTeX Font Info:    Trying to load font information for U+msb on input line 62.
+LaTeX Font Info:    Trying to load font information for U+msb on input line 63.
  (/Users/nkorf/Library/TinyTeX/texmf-dist/tex/latex/amsfonts/umsb.fd
 File: umsb.fd 2013/01/14 v3.01 AMS symbols B
 ) [1
@@ -431,13 +431,13 @@ File: lstlang3.sty 2025/11/14 1.11b listings language file
 LaTeX Warning: `h' float specifier changed to `ht'.
 
 [4]
-<causality_matrix_plot.pdf, id=231, 578.16pt x 289.08pt>
+<causality_matrix_plot.pdf, id=232, 578.16pt x 289.08pt>
 File: causality_matrix_plot.pdf Graphic file (type pdf)
 <use causality_matrix_plot.pdf>
-Package pdftex.def Info: causality_matrix_plot.pdf  used on input line 273.
+Package pdftex.def Info: causality_matrix_plot.pdf  used on input line 274.
 (pdftex.def)             Requested size: 430.31812pt x 215.15974pt.
 
-Overfull \hbox (31.56255pt too wide) in paragraph at lines 280--281
+Overfull \hbox (31.56255pt too wide) in paragraph at lines 281--282
 \T1/cmr/m/n/10.95 Choosing the ap-pro-pri-ate lag or-der is crit-i-cal for Granger causal-ity test-ing. The \T1/cmtt/m/n/10.95 granger_lag_select()
  []
 
@@ -445,25 +445,25 @@ Overfull \hbox (31.56255pt too wide) in paragraph at lines 280--281
 pdfTeX warning (ext4): destination with the same identifier (name{table.1}) has been already used, duplicate ignored
 <argument> ...shipout:D \box_use:N \l_shipout_box 
                                                   \__shipout_drop_firstpage_...
-l.282 \begin{lstlisting}[language=R]
+l.283 \begin{lstlisting}[language=R]
                                     ]
-<lag_selection_plot.pdf, id=246, 505.89pt x 361.35pt>
+<lag_selection_plot.pdf, id=247, 505.89pt x 361.35pt>
 File: lag_selection_plot.pdf Graphic file (type pdf)
 <use lag_selection_plot.pdf>
-Package pdftex.def Info: lag_selection_plot.pdf  used on input line 300.
+Package pdftex.def Info: lag_selection_plot.pdf  used on input line 301.
 (pdftex.def)             Requested size: 407.66833pt x 291.19768pt.
  [6
 pdfTeX warning (ext4): destination with the same identifier (name{figure.1}) has been already used, duplicate ignored
 <argument> ...shipout:D \box_use:N \l_shipout_box 
                                                   \__shipout_drop_firstpage_...
-l.312 \begin{lstlisting}[language=R]
+l.313 \begin{lstlisting}[language=R]
                                      <./causality_matrix_plot.pdf>] [7
 pdfTeX warning (ext4): destination with the same identifier (name{figure.2}) has been already used, duplicate ignored
 <argument> ...shipout:D \box_use:N \l_shipout_box 
                                                   \__shipout_drop_firstpage_...
-l.342 \begin{lstlisting}[language=R]
+l.343 \begin{lstlisting}[language=R]
                                      <./lag_selection_plot.pdf>] [8] [9]
-Overfull \hbox (9.26144pt too wide) in paragraph at lines 485--486
+Overfull \hbox (9.26144pt too wide) in paragraph at lines 486--487
 \T1/cmr/m/n/10.95 Despite its com-pre-hen-sive func-tion-al-ity for pair-wise Granger causal-ity anal-y-sis, the \T1/cmtt/m/n/10.95 grangersearch
  []
 
@@ -484,10 +484,10 @@ Here is how much of TeX's memory you used:
  81 hyphenation exceptions out of 8191
  75i,9n,79p,1088b,2044s stack positions out of 10000i,1000n,20000p,200000b,200000s
  </Users/nkorf/Library/TinyTeX/texmf-var/fonts/pk/ljfour/jknappen/ec/ecti1095.600pk> </Users/nkorf/Library/TinyTeX/texmf-var/fonts/pk/ljfour/jknappen/ec/ecrm0600.600pk> </Users/nkorf/Library/TinyTeX/texmf-var/fonts/pk/ljfour/jknappen/ec/ecbx1200.600pk> </Users/nkorf/Library/TinyTeX/texmf-var/fonts/pk/ljfour/jknappen/ec/tcrm1095.600pk> </Users/nkorf/Library/TinyTeX/texmf-var/fonts/pk/ljfour/jknappen/ec/ectt1095.600pk> </Users/nkorf/Library/TinyTeX/texmf-var/fonts/pk/ljfour/jknappen/ec/ecbx1440.600pk> </Users/nkorf/Library/TinyTeX/texmf-var/fonts/pk/ljfour/jknappen/ec/ecrm1095.600pk> </Users/nkorf/Library/TinyTeX/texmf-var/fonts/pk/ljfour/jknappen/ec/ecbx1095.600pk> </Users/nkorf/Library/TinyTeX/texmf-var/fonts/pk/ljfour/jknappen/ec/ectt1000.600pk> </Users/nkorf/Library/TinyTeX/texmf-var/fonts/pk/ljfour/jknappen/ec/ecrm1000.600pk> </Users/nkorf/Library/TinyTeX/texmf-var/fonts/pk/ljfour/jknappen/ec/ecbx1000.600pk> </Users/nkorf/Library/TinyTeX/texmf-var/fonts/pk/ljfour/jknappen/ec/ectt1200.600pk> </Users/nkorf/Library/TinyTeX/texmf-var/fonts/pk/ljfour/jknappen/ec/ecti1200.600pk> </Users/nkorf/Library/TinyTeX/texmf-var/fonts/pk/ljfour/jknappen/ec/ecrm1200.600pk> </Users/nkorf/Library/TinyTeX/texmf-var/fonts/pk/ljfour/jknappen/ec/ecrm1728.600pk> </Users/nkorf/Library/TinyTeX/texmf-var/fonts/pk/ljfour/jknappen/ec/ecbx1728.600pk></Users/nkorf/Library/TinyTeX/texmf-dist/fonts/type1/public/amsfonts/cm/cmex10.pfb></Users/nkorf/Library/TinyTeX/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi10.pfb></Users/nkorf/Library/TinyTeX/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi8.pfb></Users/nkorf/Library/TinyTeX/texmf-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb></Users/nkorf/Library/TinyTeX/texmf-dist/fonts/type1/public/amsfonts/cm/cmr8.pfb></Users/nkorf/Library/TinyTeX/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb></Users/nkorf/Library/TinyTeX/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy8.pfb>
-Output written on grangersearch-paper.pdf (12 pages, 279504 bytes).
+Output written on grangersearch-paper.pdf (12 pages, 281228 bytes).
 PDF statistics:
- 1050 PDF objects out of 1200 (max. 8388607)
- 483 compressed objects within 5 object streams
+ 1056 PDF objects out of 1200 (max. 8388607)
+ 484 compressed objects within 5 object streams
  183 named destinations out of 1000 (max. 500000)
  227 words of extra memory for PDF output out of 10000 (max. 10000000)
 
