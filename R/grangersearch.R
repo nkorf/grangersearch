@@ -964,6 +964,8 @@ granger_lag_select <- function(.data, ..., lag = 1:4, alpha = 0.05, test = "F",
 #' Granger causality tests.
 #'
 #' @param x A `granger_lag_select` object from [granger_lag_select()].
+#' @param monochrome Logical. If TRUE, uses black lines with different line types
+#'   and point symbols instead of colors. Suitable for publications. Default FALSE.
 #' @param ... Additional arguments (ignored).
 #'
 #' @return A base R plot (invisibly returns the input).
@@ -984,7 +986,7 @@ granger_lag_select <- function(.data, ..., lag = 1:4, alpha = 0.05, test = "F",
 #' plot(lag_results)
 #'
 #' @export
-plot.granger_lag_select <- function(x, ...) {
+plot.granger_lag_select <- function(x, monochrome = FALSE, ...) {
   alpha <- attr(x, "alpha") %||% 0.05
 
   # Get unique directions
@@ -992,8 +994,16 @@ plot.granger_lag_select <- function(x, ...) {
   directions <- unique(x$direction)
   n_dir <- length(directions)
 
-  # Set up colors
-  colors <- grDevices::rainbow(n_dir)
+  # Set up colors and line types
+  if (monochrome) {
+    colors <- rep("black", n_dir)
+    ltys <- rep(1:6, length.out = n_dir)
+    pchs <- c(1, 2, 0, 5, 6, 4)[rep(1:6, length.out = n_dir)]
+  } else {
+    colors <- grDevices::rainbow(n_dir)
+    ltys <- rep(1, n_dir)
+    pchs <- rep(19, n_dir)
+  }
 
   # Create plot
   graphics::plot(
@@ -1011,8 +1021,8 @@ plot.granger_lag_select <- function(x, ...) {
   for (i in seq_along(directions)) {
     d <- directions[i]
     subset_data <- x[x$direction == d, ]
-    graphics::lines(subset_data$lag, subset_data$p.value, col = colors[i], lwd = 2)
-    graphics::points(subset_data$lag, subset_data$p.value, col = colors[i], pch = 19)
+    graphics::lines(subset_data$lag, subset_data$p.value, col = colors[i], lwd = 2, lty = ltys[i])
+    graphics::points(subset_data$lag, subset_data$p.value, col = colors[i], pch = pchs[i])
   }
 
   # Add legend
@@ -1021,7 +1031,8 @@ plot.granger_lag_select <- function(x, ...) {
     legend = directions,
     col = colors,
     lwd = 2,
-    pch = 19,
+    lty = ltys,
+    pch = pchs,
     cex = 0.8,
     bg = "white"
   )
@@ -1079,6 +1090,8 @@ print.granger_search_result <- function(x, ...) {
 #' @param gradient Logical. If TRUE (default), use gradient coloring based on values.
 #'   If FALSE, cells are colored simply as significant (colored) or not significant (gray),
 #'   and actual p-values are displayed in cells when `type = "pvalue"`.
+#' @param monochrome Logical. If TRUE, uses grayscale palette instead of blue.
+#'   Suitable for publications. Default FALSE.
 #' @param ... Additional arguments (ignored).
 #'
 #' @return Invisibly returns the input object.
@@ -1123,7 +1136,8 @@ print.granger_search_result <- function(x, ...) {
 #'
 #' @export
 plot.granger_search_result <- function(x, type = c("pvalue", "significance", "statistic"),
-                                        show_values = TRUE, gradient = TRUE, ...) {
+                                        show_values = TRUE, gradient = TRUE,
+                                        monochrome = FALSE, ...) {
   type <- match.arg(type)
   alpha <- attr(x, "alpha") %||% 0.05
 
@@ -1184,12 +1198,20 @@ plot.granger_search_result <- function(x, type = c("pvalue", "significance", "st
 
   # Color palette
   if (!gradient || type == "significance") {
-    colors <- c("gray90", "steelblue3")
+    if (monochrome) {
+      colors <- c("gray90", "gray30")
+    } else {
+      colors <- c("gray90", "steelblue3")
+    }
     breaks <- c(-0.5, 0.5, 1.5)
     n_colors <- 2
   } else {
     n_colors <- 100
-    colors <- grDevices::colorRampPalette(c("gray95", "lightblue", "steelblue", "darkblue"))(n_colors)
+    if (monochrome) {
+      colors <- grDevices::colorRampPalette(c("gray95", "gray70", "gray40", "gray10"))(n_colors)
+    } else {
+      colors <- grDevices::colorRampPalette(c("gray95", "lightblue", "steelblue", "darkblue"))(n_colors)
+    }
     breaks <- seq(0, max_val * 1.01, length.out = n_colors + 1)
   }
 
@@ -1564,6 +1586,8 @@ print.granger_distribution <- function(x, ...) {
 #'
 #' @param x A `granger_distribution` object from [granger_distribution()].
 #' @param type Character. Type of plot: "histogram" (default), "density", or "violin".
+#' @param monochrome Logical. If TRUE, uses black/gray instead of colors.
+#'   Suitable for publications. Default FALSE.
 #' @param ... Additional arguments (ignored).
 #'
 #' @return Invisibly returns the input object.
@@ -1591,7 +1615,8 @@ print.granger_distribution <- function(x, ...) {
 #' plot(dist, type = "violin")
 #'
 #' @export
-plot.granger_distribution <- function(x, type = c("histogram", "density", "violin"), ...) {
+plot.granger_distribution <- function(x, type = c("histogram", "density", "violin"),
+                                       monochrome = FALSE, ...) {
   type <- match.arg(type)
 
   data <- x$data[!is.na(x$data$gc_strength), ]
@@ -1612,6 +1637,10 @@ plot.granger_distribution <- function(x, type = c("histogram", "density", "violi
       graphics::par(mfrow = c(n_rows, n_cols), mar = c(4, 4, 3, 1))
     }
 
+    hist_col <- if (monochrome) "gray60" else "steelblue"
+    hist_border <- if (monochrome) "gray30" else "white"
+    mean_col <- if (monochrome) "black" else "red"
+
     for (p in x$lag) {
       subset_data <- data[data$lag == p, ]
       gc_vals <- subset_data$gc_strength
@@ -1621,17 +1650,24 @@ plot.granger_distribution <- function(x, type = c("histogram", "density", "violi
           gc_vals,
           main = sprintf("Lag = %d (%s)", p, x$type),
           xlab = "GC Strength (log variance ratio)",
-          col = "steelblue",
-          border = "white",
+          col = hist_col,
+          border = hist_border,
           breaks = "Sturges"
         )
-        graphics::abline(v = mean(gc_vals), col = "red", lwd = 2, lty = 2)
+        graphics::abline(v = mean(gc_vals), col = mean_col, lwd = 2, lty = 2)
         graphics::abline(v = 0, col = "gray50", lwd = 1, lty = 3)
       }
     }
 
   } else if (type == "density") {
-    colors <- grDevices::rainbow(n_lags)
+    # Set up colors and line types
+    if (monochrome) {
+      colors <- rep("black", n_lags)
+      ltys <- rep(1:6, length.out = n_lags)
+    } else {
+      colors <- grDevices::rainbow(n_lags)
+      ltys <- rep(1, n_lags)
+    }
 
     # Get overall range
     all_gc <- data$gc_strength
@@ -1671,7 +1707,7 @@ plot.granger_distribution <- function(x, type = c("histogram", "density", "violi
 
     for (i in seq_along(densities)) {
       if (!is.null(densities[[i]])) {
-        graphics::lines(densities[[i]], col = colors[i], lwd = 2)
+        graphics::lines(densities[[i]], col = colors[i], lwd = 2, lty = ltys[i])
       }
     }
 
@@ -1682,6 +1718,7 @@ plot.granger_distribution <- function(x, type = c("histogram", "density", "violi
       legend = paste("Lag", x$lag),
       col = colors,
       lwd = 2,
+      lty = ltys,
       cex = 0.8,
       bg = "white"
     )
@@ -1690,14 +1727,17 @@ plot.granger_distribution <- function(x, type = c("histogram", "density", "violi
     # Simple boxplot-based visualization (violin requires additional packages)
     data$lag_factor <- factor(data$lag, levels = x$lag)
 
+    box_col <- if (monochrome) "gray60" else "steelblue"
+    box_border <- if (monochrome) "black" else "darkblue"
+
     graphics::boxplot(
       gc_strength ~ lag_factor,
       data = data,
       main = sprintf("GC Distribution by Lag (%s)", x$type),
       xlab = "Lag",
       ylab = "GC Strength (log variance ratio)",
-      col = "steelblue",
-      border = "darkblue"
+      col = box_col,
+      border = box_border
     )
     graphics::abline(h = 0, col = "gray50", lwd = 1, lty = 3)
   }

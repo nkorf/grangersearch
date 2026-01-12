@@ -4,10 +4,13 @@
 \alias{plot.granger_lag_select}
 \title{Plot Lag Selection Results}
 \usage{
-\method{plot}{granger_lag_select}(x, ...)
+\method{plot}{granger_lag_select}(x, monochrome = FALSE, ...)
 }
 \arguments{
 \item{x}{A \code{granger_lag_select} object from \code{\link[=granger_lag_select]{granger_lag_select()}}.}
+
+\item{monochrome}{Logical. If TRUE, uses black lines with different line types
+and point symbols instead of colors. Suitable for publications. Default FALSE.}
 
 \item{...}{Additional arguments (ignored).}
 }

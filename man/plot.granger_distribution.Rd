@@ -4,12 +4,15 @@
 \alias{plot.granger_distribution}
 \title{Plot Granger Causality Distribution}
 \usage{
-\method{plot}{granger_distribution}(x, type = c("histogram", "density", "violin"), ...)
+\method{plot}{granger_distribution}(x, type = c("histogram", "density", "violin"), monochrome = FALSE, ...)
 }
 \arguments{
 \item{x}{A \code{granger_distribution} object from \code{\link[=granger_distribution]{granger_distribution()}}.}
 
 \item{type}{Character. Type of plot: "histogram" (default), "density", or "violin".}
+
+\item{monochrome}{Logical. If TRUE, uses black/gray instead of colors.
+Suitable for publications. Default FALSE.}
 
 \item{...}{Additional arguments (ignored).}
 }

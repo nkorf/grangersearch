@@ -9,6 +9,7 @@
   type = c("pvalue", "significance", "statistic"),
   show_values = TRUE,
   gradient = TRUE,
+  monochrome = FALSE,
   ...
 )
 }
@@ -28,6 +29,9 @@ stronger evidence of causality.
 \item{gradient}{Logical. If TRUE (default), use gradient coloring based on values.
 If FALSE, cells are colored simply as significant (colored) or not significant (gray),
 and actual p-values are displayed in cells when \code{type = "pvalue"}.}
+
+\item{monochrome}{Logical. If TRUE, uses grayscale palette instead of blue.
+Suitable for publications. Default FALSE.}
 
 \item{...}{Additional arguments (ignored).}
 }
