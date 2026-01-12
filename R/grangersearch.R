@@ -1673,14 +1673,7 @@ plot.granger_distribution <- function(x, type = c("histogram", "density", "violi
     all_gc <- data$gc_strength
     x_range <- range(all_gc)
 
-    graphics::plot(
-      x_range, c(0, 1),
-      type = "n",
-      xlab = "GC Strength (log variance ratio)",
-      ylab = "Density",
-      main = sprintf("GC Distribution by Lag (%s)", x$type)
-    )
-
+    # Calculate densities first (without plotting)
     max_density <- 0
     densities <- list()
 
@@ -1696,7 +1689,7 @@ plot.granger_distribution <- function(x, type = c("histogram", "density", "violi
       }
     }
 
-    # Replot with correct y-axis
+    # Single plot with correct y-axis
     graphics::plot(
       x_range, c(0, max_density * 1.1),
       type = "n",
