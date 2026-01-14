@@ -92,8 +92,10 @@ If you use this package, please cite:
 ## Author
 
 **Nikolaos Korfiatis**
-Department of Informatics, Ionian University
-Corfu, Greece
+Department of Informatics, 
+Faculty of Information Science and Informatics, 
+Plateia Iatrou Tsirigoti 7, Ionian University
+GR 49100 Corfu, Greece
 nkorf@ionio.gr
 
 ## License
