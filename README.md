@@ -89,12 +89,6 @@ U -> e:   U does not Granger-cause e (p = 0.2983, strength = 0.030)
   <img src="man/figures/cran-downloads.png" alt="CRAN download statistics" width="700"/>
 </p>
 
-Download data retrieved via the [`cranlogs`](https://github.com/r-hub/cranlogs) package. To regenerate the plot, run:
-
-```r
-source("data-raw/cran_downloads_badge.R")
-```
-
 ## Citation
 
 If you use this package, please cite:
